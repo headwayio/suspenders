@@ -1,7 +1,5 @@
-module Voyage
+module Suspenders
   class AppBuilder < Rails::AppBuilder
-    include Suspenders::Actions
-
     def application_js
       template "../templates/application.js", "app/assets/javascripts/application.js", force: true
     end
@@ -13,15 +11,16 @@ module Voyage
     def configure_generators
       config = <<-RUBY
 
-    config.generators do |generate|
-      generate.helper false
-      generate.javascript_engine false
-      generate.request_specs false
-      generate.routing_specs false
-      generate.stylesheets false
-      generate.test_framework :rspec
-      generate.view_specs false
-      generate.fixture_replacement :factory_girl, dir: 'spec/factories'
+    config.generators do |g|
+      g.helper false
+      g.javascript_engine false
+      g.request_specs false
+      g.routing_specs false
+      g.stylesheets false
+      g.test_framework :rspec
+      g.view_specs false
+      g.fixture_replacement :factory_girl, dir: 'spec/factories'
+      g.template_engine :slim
     end
 
       RUBY
@@ -81,11 +80,5 @@ module Voyage
     # -----------------
     # End Configure App
     # -----------------
-
-
-    def create_heroku_apps(flags)
-      create_staging_heroku_app(flags)
-      create_production_heroku_app(flags)
-    end
   end
 end

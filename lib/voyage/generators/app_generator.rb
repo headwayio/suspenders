@@ -1,13 +1,15 @@
-module Voyage
-  class AppGenerator < Suspenders::AppGenerator
+module Suspenders
+  class AppGenerator < Rails::Generators::AppGenerator
     class_option :skip_turbolinks, type: :boolean, default: false,
       desc: "Skip turbolinks gem"
 
     class_option :skip_bundle, type: :boolean, aliases: "-B", default: false,
       desc: "Don't run bundle install"
 
-    def suspenders_customization
+    def finish_template
+      invoke :suspenders_customization
       invoke :customize_application_js
+      invoke :bon_voyage
       super
     end
 
@@ -16,13 +18,12 @@ module Voyage
     end
 
     def outro
-      say 'Congratulations! You just pulled our suspenders, Headway style!'
+      # need this to be nothing so it doesn't output any text when
+      # :suspenders_customization runs and it invokes this method
     end
 
-    protected
-
-    def get_builder_class
-      Voyage::AppBuilder
+    def bon_voyage
+      say 'Congratulations! You just pulled our suspenders, Headway style!'
     end
   end
 end
