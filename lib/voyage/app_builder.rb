@@ -4,6 +4,22 @@ module Suspenders
       template "../templates/application.js", "app/assets/javascripts/application.js", force: true
     end
 
+    def install_devise
+      generate 'devise:install'
+      generate 'model user first_name:string last_name:string'
+      generate 'devise', 'user'
+      generate 'devise:views'
+      run 'gem install html2slim'
+      inside('lib') do # arbitrary, run in context of newly generated app
+        run "erb2slim '../app/views/devise' './app/views/devise'"
+        run "erb2slim -d '../app/views/devise'"
+      end
+    end
+
+
+
+
+
     def gemfile
       template "../templates/Gemfile.erb", "Gemfile"
     end

@@ -9,12 +9,17 @@ module Suspenders
     def finish_template
       invoke :suspenders_customization
       invoke :customize_application_js
+      invoke :generate_devise_install
       invoke :bon_voyage
       super
     end
 
     def customize_application_js
       build :application_js
+    end
+
+    def generate_devise_install
+      build :install_devise
     end
 
     def outro
