@@ -6,7 +6,7 @@ module Suspenders
 
     def install_devise
       generate 'devise:install'
-      generate 'model user first_name:string last_name:string'
+      generate 'scaffold user first_name:string last_name:string'
       generate 'devise', 'user'
       generate 'devise:views'
       run 'gem install html2slim'
