@@ -1,6 +1,8 @@
+# rubocop:disable Metrics/LineLength
 source "https://rubygems.org"
 
 ruby "<%= Voyage::RUBY_VERSION %>"
+#ruby-gemset=<%= @app_name %>
 
 gem "autoprefixer-rails"
 gem "bourbon", "~> 4.2.0"
@@ -18,19 +20,42 @@ gem "recipient_interceptor"
 gem "sass-rails", "~> 5.0"
 gem "simple_form"
 gem "title"
-gem 'turbolinks'
-gem 'jquery-turbolinks'
 gem "uglifier"
 
-gem 'cancancan'
-gem 'canard', git: 'https://github.com/james2m/canard.git'
-gem 'nprogress-rails'
-gem 'friendly_id'
-gem 'pry-rails'
+# Customizations
+gem 'responders' # respond to json/html/js more easily in controllers
+gem 'slim-rails' # templating
+gem 'font-awesome-rails'
+gem 'dynamic_form' # for custom messages without the database column
+gem 'nested_form_fields' # Dynamically add and remove nested has_many association fields in a Ruby on Rails form
+gem 'devise'
+
+gem 'turbolinks'
+gem 'jquery-turbolinks'
+gem 'jquery-ui-rails'
+gem 'nprogress-rails' # Show request progress when a link is clicked
+gem 'gon' # pass variables betwween rails and javascript. Several examples in the application_controller.rb
+
+gem 'cancancan' # authorization library
+gem 'canard', git: 'https://github.com/james2m/canard.git' # ties into cancancan, adds roles for the user
+
+gem 'friendly_id' # slugs in the url auto-generated
+gem 'paper_trail'
+gem 'settingslogic' # yaml settings (project wide, non-editable), this is implemented with the model Settings.rb
+
+# Want these here for debugging on production
+gem 'pry-rails' # better REPL than irb
 gem 'pry-awesome_print'
 gem 'pry-byebug'
-gem 'rubocop'
+gem 'pry-remote'
 
+gem 'librato-rails' # general monitoring of things
+gem 'nondestructive_migrations'
+gem 'carrierwave'
+gem 'mini_magick'
+gem 'fog'
+gem 'whenever', require: false # provides a clear syntax for writing and deploying cron jobs
+gem 'whenever-web'
 
 group :development do
   gem "quiet_assets"
@@ -38,6 +63,14 @@ group :development do
   gem "spring"
   gem "spring-commands-rspec"
   gem "web-console"
+
+  # Customizations
+  gem 'annotate' # annotate models automatically when rake db:migrate is called
+  gem 'rails-erd' # auto gen ERD Diagram of models in the app on rake db:migrate
+  gem 'zenflow', github: 'zencoder/zenflow'
+  gem 'better_errors' # A better error page for rails when a local 500 (or similar) is thrown
+  gem 'binding_of_caller' # REPL in better_errors to debug in the browser at the point at which it failed
+  gem 'meta_request' # for chrome rails console plugin found here: https://chrome.google.com/webstore/detail/railspanel/gjpfobpafnhjhbajcjgccbbdofdckggg?hl=en-US
 end
 
 group :development, :test do
@@ -47,6 +80,14 @@ group :development, :test do
   gem "dotenv-rails"
   gem "factory_girl_rails"
   gem "rspec-rails", "~> 3.4.0"
+
+  # Customizations
+  gem 'faker' # provides auto generated names for factories, can be customized
+
+  gem 'rubocop', '0.36.0', require: false # lock to keep in sync with Hound
+  gem 'rubocop-rspec', require: false
+
+  gem 'letter_opener' # auto-open emails when they're sent
 end
 
 group :development, :staging do
@@ -61,6 +102,13 @@ group :test do
   gem "simplecov", require: false
   gem "timecop"
   gem "webmock"
+
+  # Customizations
+  gem 'cadre' # highlights code coverage in vim
+
+  gem 'capybara'
+  gem 'poltergeist'
+  gem 'selenium-webdriver' # brew install chromedriver
 end
 
 group :staging, :production do
