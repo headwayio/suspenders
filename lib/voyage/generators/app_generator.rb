@@ -9,7 +9,9 @@ module Suspenders
     def finish_template
       invoke :suspenders_customization
       invoke :customize_application_js
+      invoke :customize_application_controller
       invoke :generate_devise_install
+      invoke :customize_devise_views
       invoke :bon_voyage
       super
     end
@@ -18,8 +20,16 @@ module Suspenders
       build :application_js
     end
 
+    def customize_application_controller
+      build :application_controller
+    end
+
     def generate_devise_install
       build :install_devise
+    end
+
+    def customize_devise_views
+      build :custom_devise_views
     end
 
     def outro

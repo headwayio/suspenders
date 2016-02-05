@@ -4,11 +4,15 @@ module Suspenders
       template "../templates/application.js", "app/assets/javascripts/application.js", force: true
     end
 
+    def application_controller
+      template "../templates/application_controller.rb", "app/controllers/application_controller.rb", force: true
+    end
+
     def install_devise
-      generate 'devise:install'
-      generate 'scaffold user first_name:string last_name:string'
-      generate 'devise', 'user'
-      generate 'devise:views'
+      bundle_command 'exec rails generate devise:install'
+      bundle_command 'exec rails generate scaffold user first_name:string last_name:string'
+      bundle_command 'exec rails generate devise user'
+      bundle_command 'exec rails generate devise:views'
       run 'gem install html2slim'
       inside('lib') do # arbitrary, run in context of newly generated app
         run "erb2slim '../app/views/devise' './app/views/devise'"
@@ -16,7 +20,10 @@ module Suspenders
       end
     end
 
-
+    def custom_devise_views
+      template "../templates/devise/edit.html.slim", "app/views/devise/registrations/edit.html.slim", force: true
+      template "../templates/devise/new.html.slim", "app/views/devise/registrations/new.html.slim", force: true
+    end
 
 
 
