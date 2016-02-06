@@ -6,6 +6,22 @@ module Suspenders
     class_option :skip_bundle, type: :boolean, aliases: "-B", default: false,
       desc: "Don't run bundle install"
 
+    def self.start
+      preflight_check
+
+      super
+    end
+
+    def self.preflight_check
+      puts '"bundle install" will be run for the current ruby version and gemset. Press enter to continue...'
+      prompt = STDIN.gets.chomp
+
+      unless prompt.empty?
+        puts "Skipping install. Please create a ruby gemset first!"
+        exit 1
+      end
+    end
+
     def finish_template
       invoke :suspenders_customization
       invoke :customize_application_js
