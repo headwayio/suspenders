@@ -3,7 +3,7 @@ module Suspenders
     class_option :skip_turbolinks, type: :boolean, default: false,
       desc: "Skip turbolinks gem"
 
-    class_option :skip_bundle, type: :boolean, aliases: "-B", default: false,
+    class_option :skip_bundle, type: :boolean, aliases: "-B", default: true,
       desc: "Don't run bundle install"
 
     def self.start
@@ -25,9 +25,9 @@ module Suspenders
     def finish_template
       invoke :suspenders_customization
       invoke :customize_application_js
-      invoke :customize_application_controller
       invoke :generate_devise_install
-      invoke :customize_devise_views
+      invoke :customize_application_controller
+      invoke :actually_setup_spring
       invoke :bon_voyage
       super
     end
@@ -44,8 +44,13 @@ module Suspenders
       build :install_devise
     end
 
-    def customize_devise_views
-      build :custom_devise_views
+    def setup_spring
+      # do nothing so we can run generators after suspenders_customization runs
+    end
+
+    def actually_setup_spring
+      say "Springifying binstubs"
+      build :setup_spring
     end
 
     def outro

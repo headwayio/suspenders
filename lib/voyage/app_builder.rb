@@ -1,34 +1,51 @@
 module Suspenders
   class AppBuilder < Rails::AppBuilder
     def application_js
-      template "../templates/application.js", "app/assets/javascripts/application.js", force: true
+      template '../templates/application.js', 'app/assets/javascripts/application.js', force: true
     end
 
     def application_controller
-      template "../templates/application_controller.rb", "app/controllers/application_controller.rb", force: true
+      template '../templates/application_controller.rb', 'app/controllers/application_controller.rb', force: true
     end
 
     def install_devise
-      bundle_command 'exec rails generate devise:install'
-      bundle_command 'exec rails generate scaffold user first_name:string last_name:string'
-      bundle_command 'exec rails generate devise user'
-      bundle_command 'exec rails generate devise:views'
-      run 'gem install html2slim'
-      inside('lib') do # arbitrary, run in context of newly generated app
-        run "erb2slim '../app/views/devise' './app/views/devise'"
-        run "erb2slim -d '../app/views/devise'"
+      if yes?('Would you like to install Devise? (y/N)')
+        bundle_command 'exec rails generate devise:install'
+
+        model_name = ask('What would you like the user model to be called? [user]')
+        model_name = 'user' if model_name.blank?
+
+        if yes?("Would you like to add first_name and last_name to the devise model? (y/N)")
+          adding_first_and_last_name = true
+          bundle_command "exec rails generate scaffold #{model_name} first_name:string last_name:string"
+        end
+
+        bundle_command "exec rails generate devise #{model_name}"
+        bundle_command 'exec rails generate devise:views'
+
+        run 'gem install html2slim'
+        inside('lib') do # arbitrary, run in context of newly generated app
+          run "erb2slim '../app/views/devise' '../app/views/devise'"
+          run "erb2slim -d '../app/views/devise'"
+        end
+
+        customize_devise_views if adding_first_and_last_name
       end
     end
 
-    def custom_devise_views
-      template "../templates/devise/edit.html.slim", "app/views/devise/registrations/edit.html.slim", force: true
-      template "../templates/devise/new.html.slim", "app/views/devise/registrations/new.html.slim", force: true
+    def customize_devise_views
+      %w(edit new).each do |file|
+        file_path = "app/views/devise/registrations/#{file}.html.slim"
+        inject_into_file file_path, before: "    = f.input :email, required: true, autofocus: true" do <<-'RUBY'
+    = f.input :first_name, required: true, autofocus: true
+    = f.input :last_name, required: true
+RUBY
+        end
+      end
     end
 
-
-
     def gemfile
-      template "../templates/Gemfile.erb", "Gemfile"
+      template '../templates/Gemfile.erb', 'Gemfile'
     end
 
     def configure_generators
