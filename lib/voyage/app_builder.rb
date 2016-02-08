@@ -35,6 +35,7 @@ module Suspenders
         customize_application_controller_for_devise(adding_first_and_last_name)
         customize_resource_controller_for_devise(model_name)
         add_views_for_devise_resource(adding_first_and_last_name)
+        add_root_definition_to_routes(model_name)
       end
     end
 
@@ -95,6 +96,21 @@ RUBY
       inject_into_class "app/controllers/#{controller_name}_controller.rb", "#{model_name.camelize.pluralize}Controller" do <<-RUBY.gsub(/^ {6}/, '')
         # https://github.com/CanCanCommunity/cancancan/wiki/authorizing-controller-actions
         load_and_authorize_resource only: [:index, :show]
+        RUBY
+      end
+
+      inject_into_file 'config/routes.rb', after: '  devise_for :users' do <<-RUBY.gsub(/^ {6}/, '')
+        \n
+        resources :#{controller_name}
+        RUBY
+      end
+    end
+
+    def add_root_definition_to_routes(model_name)
+      controller_name = model_name.parameterize.underscore.pluralize
+
+      inject_into_file 'config/routes.rb', before: /^end/ do <<-RUBY.gsub(/^ {6}/, '').gsub(/^ {8}\n/, '')
+        root_to: "#{controller_name}#index"
         RUBY
       end
     end
