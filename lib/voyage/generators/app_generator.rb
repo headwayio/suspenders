@@ -26,7 +26,6 @@ module Suspenders
       invoke :suspenders_customization
       invoke :customize_application_js
       invoke :generate_devise_install
-      invoke :customize_application_controller
       invoke :actually_setup_spring
       invoke :bon_voyage
       super
@@ -34,10 +33,6 @@ module Suspenders
 
     def customize_application_js
       build :application_js
-    end
-
-    def customize_application_controller
-      build :application_controller
     end
 
     def generate_devise_install

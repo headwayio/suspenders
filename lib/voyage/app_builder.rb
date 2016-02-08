@@ -4,10 +4,6 @@ module Suspenders
       template '../templates/application.js', 'app/assets/javascripts/application.js', force: true
     end
 
-    def application_controller
-      template '../templates/application_controller.rb', 'app/controllers/application_controller.rb', force: true
-    end
-
     def install_devise
       if yes?('Would you like to install Devise? (y/N)')
         bundle_command 'exec rails generate devise:install'
@@ -17,7 +13,13 @@ module Suspenders
 
         if yes?("Would you like to add first_name and last_name to the devise model? (y/N)")
           adding_first_and_last_name = true
-          bundle_command "exec rails generate scaffold #{model_name} first_name:string last_name:string"
+
+          bundle_command "exec rails generate resource #{model_name} first_name:string last_name:string"
+
+          replace_in_file 'spec/factories/users.rb',
+            'first_name "MyString"', 'first_name { Faker::Name.first_name }'
+          replace_in_file 'spec/factories/users.rb',
+            'last_name "MyString"', 'last_name { Faker::Name.last_name }'
         end
 
         bundle_command "exec rails generate devise #{model_name}"
@@ -30,6 +32,9 @@ module Suspenders
         end
 
         customize_devise_views if adding_first_and_last_name
+        customize_application_controller_for_devise(adding_first_and_last_name)
+        customize_resource_controller_for_devise(model_name)
+        add_views_for_devise_resource(adding_first_and_last_name)
       end
     end
 
@@ -44,25 +49,80 @@ RUBY
       end
     end
 
+    def customize_application_controller_for_devise(adding_first_and_last_name)
+      inject_into_file 'app/controllers/application_controller.rb', after: "  protect_from_forgery with: :exception" do <<-RUBY.gsub(/^ {6}/, '').gsub(/^ {8}\n/, '')
+        \n
+        before_action :configure_permitted_parameters, if: :devise_controller?
+
+        protected
+
+        def configure_permitted_parameters
+          devise_parameter_sanitizer.for(:sign_up) do |u|
+            u.permit(
+              #{':first_name,' if adding_first_and_last_name}
+              #{':last_name,' if adding_first_and_last_name}
+              :email,
+              :password,
+              :password_confirmation,
+              :remember_me,
+            )
+          end
+
+          devise_parameter_sanitizer.for(:sign_in) do |u|
+            u.permit(:login, :email, :password, :remember_me)
+          end
+
+          devise_parameter_sanitizer.for(:account_update) do |u|
+            u.permit(
+              #{':first_name,' if adding_first_and_last_name}
+              #{':last_name,' if adding_first_and_last_name}
+              :email,
+              :password,
+              :password_confirmation,
+              :current_password,
+            )
+          end
+        end
+      RUBY
+      end
+    end
+
+    def customize_resource_controller_for_devise(model_name)
+      controller_name = model_name.parameterize.underscore.pluralize
+
+      bundle_command "exec rails generate controller #{controller_name}"
+
+      inject_into_class "app/controllers/#{controller_name}_controller.rb", "#{model_name.camelize.pluralize}Controller" do <<-RUBY.gsub(/^ {6}/, '')
+        # https://github.com/CanCanCommunity/cancancan/wiki/authorizing-controller-actions
+        load_and_authorize_resource only: [:index, :show]
+        RUBY
+      end
+    end
+
+    def add_views_for_devise_resource(adding_first_and_last_name)
+      opts = { adding_first_and_last_name: adding_first_and_last_name }
+      template '../templates/users_index.html.slim.erb', 'app/views/users/index.html.slim', opts
+    end
+
     def gemfile
       template '../templates/Gemfile.erb', 'Gemfile'
     end
 
     def configure_generators
-      config = <<-RUBY
-
-    config.generators do |g|
-      g.helper false
-      g.javascript_engine false
-      g.request_specs false
-      g.routing_specs false
-      g.stylesheets false
-      g.test_framework :rspec
-      g.view_specs false
-      g.fixture_replacement :factory_girl, dir: 'spec/factories'
-      g.template_engine :slim
-    end
-
+      config = <<-RUBY.gsub(/^ {4}/, '')
+        \n
+        config.generators do |g|
+          g.helper false
+          g.javascript_engine false
+          g.request_specs false
+          g.routing_specs false
+          g.stylesheets false
+          g.test_framework :rspec
+          g.view_specs false
+          g.fixture_replacement :factory_girl, dir: 'spec/factories'
+          g.template_engine :slim
+        end
+        \n
       RUBY
 
       inject_into_class 'config/application.rb', 'Application', config
