@@ -110,7 +110,7 @@ RUBY
       controller_name = model_name.parameterize.underscore.pluralize
 
       inject_into_file 'config/routes.rb', before: /^end/ do <<-RUBY.gsub(/^ {6}/, '').gsub(/^ {8}\n/, '')
-        root_to: "#{controller_name}#index"
+        root "#{controller_name}#index"
         RUBY
       end
     end
