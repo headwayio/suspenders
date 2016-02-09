@@ -24,19 +24,56 @@ module Suspenders
 
     def finish_template
       invoke :suspenders_customization
+      invoke :use_slim
+      invoke :install_devise
       invoke :customize_application_js
-      invoke :generate_devise_install
+      invoke :require_files_in_lib
+      invoke :generate_date_time_formats
+      invoke :generate_ruby_version_and_gemset
+      invoke :generate_data_migrations
+      invoke :add_about_page_through_high_voltage
+
+      # Do these last
+      invoke :rake_db_setup
       invoke :actually_setup_spring
       invoke :bon_voyage
       super
     end
 
-    def customize_application_js
-      build :application_js
+    def use_slim
+      build :use_slim
     end
 
-    def generate_devise_install
+    def install_devise
       build :install_devise
+    end
+
+    def customize_application_js
+      build :customize_application_js
+    end
+
+    def require_files_in_lib
+      build :require_files_in_lib
+    end
+
+    def generate_date_time_formats
+      build :generate_date_time_formats
+    end
+
+    def generate_ruby_version_and_gemset
+      build :generate_ruby_version_and_gemset
+    end
+
+    def generate_data_migrations
+      build :generate_data_migrations
+    end
+
+    def add_about_page_through_high_voltage
+      build :add_about_page_through_high_voltage
+    end
+
+    def rake_db_setup
+      build :rake_db_setup
     end
 
     def setup_spring

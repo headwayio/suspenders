@@ -1,51 +1,118 @@
 module Suspenders
   class AppBuilder < Rails::AppBuilder
-    def application_js
-      template '../templates/application.js', 'app/assets/javascripts/application.js', force: true
+    def agree?(prompt)
+      puts prompt
+      response = STDIN.gets.chomp
+
+      response.empty? || %w(y yes).include?(response.downcase.strip)
     end
 
+    def use_slim
+      if agree?('Would you like to use slim? (Y/n)')
+        @@use_slim = true
+        run 'gem install html2slim'
+
+        find = <<-RUBY.gsub(/^ {8}/, '')
+          <%#
+            Configure default and controller-, and view-specific titles in
+            config/locales/en.yml. For more see:
+            https://github.com/calebthompson/title#usage
+          %>
+        RUBY
+
+        replace = <<-RUBY.gsub(/^ {8}/, '')
+          <% # Configure default and controller-, and view-specific titles in
+        # config/locales/en.yml. For more see:
+        # https://github.com/calebthompson/title#usage %>
+        RUBY
+
+        replace_in_file 'app/views/layouts/application.html.erb', find, replace
+
+        if @@use_slim
+          inside('lib') do # arbitrary, run in context of newly generated app
+            run "erb2slim '../app/views/layouts' '../app/views/layouts'"
+            run "erb2slim -d '../app/views/layouts'"
+
+            run "erb2slim '../app/views/application' '../app/views/application'"
+            run "erb2slim -d '../app/views/application'"
+          end
+        end
+      else
+        @@use_slim = false
+      end
+    end
+
+    # ------------
+    # DEVISE SETUP
+    # ------------
     def install_devise
-      if yes?('Would you like to install Devise? (y/N)')
+      if agree?('Would you like to install Devise? (Y/n)')
         bundle_command 'exec rails generate devise:install'
 
-        model_name = ask('What would you like the user model to be called? [user]')
-        model_name = 'user' if model_name.blank?
-
-        if yes?("Would you like to add first_name and last_name to the devise model? (y/N)")
+        if agree?("Would you like to add first_name and last_name to the devise model? (Y/n)")
           adding_first_and_last_name = true
 
-          bundle_command "exec rails generate resource #{model_name} first_name:string last_name:string"
+          bundle_command "exec rails generate resource user first_name:string last_name:string"
 
           replace_in_file 'spec/factories/users.rb',
             'first_name "MyString"', 'first_name { Faker::Name.first_name }'
           replace_in_file 'spec/factories/users.rb',
             'last_name "MyString"', 'last_name { Faker::Name.last_name }'
+
+          inject_into_file 'spec/factories/users.rb', before: /^  end/ do <<-RUBY.gsub(/^ {8}/, '')
+            password 'password'
+            \n
+            trait :admin do
+              roles [:admin]
+              first_name 'Admin'
+              last_name 'User'
+              sequence(:email) { |n| "admin_\#{n}@example.com" }
+            end
+            RUBY
+          end
         end
 
-        bundle_command "exec rails generate devise #{model_name}"
+        bundle_command "exec rails generate devise user"
         bundle_command 'exec rails generate devise:views'
 
-        run 'gem install html2slim'
-        inside('lib') do # arbitrary, run in context of newly generated app
-          run "erb2slim '../app/views/devise' '../app/views/devise'"
-          run "erb2slim -d '../app/views/devise'"
+        if @@use_slim
+          inside('lib') do # arbitrary, run in context of newly generated app
+            run "erb2slim '../app/views/devise' '../app/views/devise'"
+            run "erb2slim -d '../app/views/devise'"
+          end
         end
 
         customize_devise_views if adding_first_and_last_name
         customize_application_controller_for_devise(adding_first_and_last_name)
-        customize_resource_controller_for_devise(model_name)
+        customize_resource_controller_for_devise(adding_first_and_last_name)
         add_views_for_devise_resource(adding_first_and_last_name)
-        add_root_definition_to_routes(model_name)
+        add_root_definition_to_routes_for_devise_resource
+        authorize_devise_resource_for_index_action
+        add_canard_roles_to_devise_resource
+        update_devise_initializer
+        add_sign_in_and_sign_out_routes_for_devise
+        generate_seeder_templates(using_devise: true)
+      else
+        generate_seeder_templates(using_devise: false)
       end
     end
 
     def customize_devise_views
       %w(edit new).each do |file|
-        file_path = "app/views/devise/registrations/#{file}.html.slim"
-        inject_into_file file_path, before: "    = f.input :email, required: true, autofocus: true" do <<-'RUBY'
-    = f.input :first_name, required: true, autofocus: true
-    = f.input :last_name, required: true
-RUBY
+        if @@use_slim
+          file_path = "app/views/devise/registrations/#{file}.html.slim"
+          inject_into_file file_path, before: "    = f.input :email, required: true, autofocus: true" do <<-'RUBY'.gsub(/^ {6}/, '')
+            = f.input :first_name, required: true, autofocus: true
+            = f.input :last_name, required: true
+            RUBY
+          end
+        else
+          file_path = "app/views/devise/registrations/#{file}.html.erb"
+          inject_into_file file_path, before: "    <%= f.input :email, required: true, autofocus: true %>" do <<-'RUBY'.gsub(/^ {6}/, '')
+            <%= f.input :first_name, required: true, autofocus: true %>
+            <%= f.input :last_name, required: true %>
+            RUBY
+          end
         end
       end
     end
@@ -84,41 +151,129 @@ RUBY
             )
           end
         end
-      RUBY
+        RUBY
       end
     end
 
-    def customize_resource_controller_for_devise(model_name)
-      controller_name = model_name.parameterize.underscore.pluralize
+    def customize_resource_controller_for_devise(adding_first_and_last_name)
+      bundle_command "exec rails generate controller users"
 
-      bundle_command "exec rails generate controller #{controller_name}"
-
-      inject_into_class "app/controllers/#{controller_name}_controller.rb", "#{model_name.camelize.pluralize}Controller" do <<-RUBY.gsub(/^ {6}/, '')
+      inject_into_class "app/controllers/users_controller.rb", "UsersController" do <<-RUBY.gsub(/^ {6}/, '')
         # https://github.com/CanCanCommunity/cancancan/wiki/authorizing-controller-actions
         load_and_authorize_resource only: [:index, :show]
         RUBY
       end
 
-      inject_into_file 'config/routes.rb', after: '  devise_for :users' do <<-RUBY.gsub(/^ {6}/, '')
-        \n
-        resources :#{controller_name}
-        RUBY
-      end
-    end
-
-    def add_root_definition_to_routes(model_name)
-      controller_name = model_name.parameterize.underscore.pluralize
-
-      inject_into_file 'config/routes.rb', before: /^end/ do <<-RUBY.gsub(/^ {6}/, '').gsub(/^ {8}\n/, '')
-        root "#{controller_name}#index"
-        RUBY
+      unless adding_first_and_last_name
+        inject_into_file 'config/routes.rb', after: '  devise_for :users' do <<-RUBY.gsub(/^ {8}/, '')
+          \n
+          resources :#{controller_name}
+          RUBY
+        end
       end
     end
 
     def add_views_for_devise_resource(adding_first_and_last_name)
-      opts = { adding_first_and_last_name: adding_first_and_last_name }
-      template '../templates/users_index.html.slim.erb', 'app/views/users/index.html.slim', opts
+      config = { adding_first_and_last_name: adding_first_and_last_name }
+      template '../templates/users_index.html.slim.erb', 'app/views/users/index.html.slim', config
     end
+
+    def add_root_definition_to_routes_for_devise_resource
+      inject_into_file 'config/routes.rb', before: /^end/ do <<-RUBY.gsub(/^ {6}/, '')
+        root "users#index"
+        RUBY
+      end
+    end
+
+    def authorize_devise_resource_for_index_action
+      generate "canard:ability user can:manage:user cannot:destroy:user"
+      generate "canard:ability admin can:destroy:user"
+      generate "migration add_roles_mask_to_users roles_mask:integer"
+    end
+
+    def add_canard_roles_to_devise_resource
+      inject_into_file 'app/models/user.rb', before: /^end/ do <<-RUBY.gsub(/^ {6}/, '')
+        \n
+        # Permissions cascade/inherit through the roles listed below. The order of
+        # this list is important, it should progress from least to most privelage
+        ROLES = [:admin].freeze
+        acts_as_user roles: ROLES
+        roles ROLES
+        RUBY
+      end
+    end
+
+    def update_devise_initializer
+      replace_in_file 'config/initializers/devise.rb',
+        'config.sign_out_via = :delete', 'config.sign_out_via = :get'
+
+      replace_in_file 'config/initializers/devise.rb',
+        "config.mailer_sender = 'please-change-me-at-config-initializers-devise@example.com'",
+        "config.mailer_sender = 'user@example.com'"
+    end
+
+    def add_sign_in_and_sign_out_routes_for_devise
+      inject_into_file 'config/routes.rb', before: /^end/ do <<-RUBY.gsub(/^ {6}/, '')
+        authenticated :user do
+          # root to: 'dashboard#show', as: :authenticated_root
+        end
+
+        devise_scope :user do
+          get 'sign-in',  to: 'devise/sessions#new'
+          get 'sign-out', to: 'devise/sessions#destroy'
+        end
+        RUBY
+      end
+    end
+    # ----------------
+    # END DEVISE SETUP
+    # ----------------
+
+    def generate_seeder_templates(using_devise:)
+      config = { force: true, using_devise: true }
+      template '../templates/seeder.rb.erb', 'lib/seeder.rb', config
+      template '../templates/seeds.rb.erb', 'db/seeds.rb', config
+    end
+
+    def customize_application_js
+      template '../templates/application.js', 'app/assets/javascripts/application.js', force: true
+    end
+
+    def require_files_in_lib
+      create_file 'config/initializers/require_files_in_lib.rb',
+        "Dir[File.join(Rails.root, 'lib', '**', '*.rb')].each { |l| require l }\n"
+    end
+
+    def generate_date_time_formats
+      template '../templates/date_time_formats.rb', 'config/initializers/date_time_formats.rb'
+    end
+
+    def generate_ruby_version_and_gemset
+      create_file '.ruby-gemset', "#{app_name}\n"
+    end
+
+    def generate_data_migrations
+      generate 'data_migrations:install'
+    end
+
+    def add_about_page_through_high_voltage
+      template '../templates/about.html', "app/views/pages/about.html.#{@@use_slim ? 'slim' : 'erb'}"
+
+      inject_into_file 'config/routes.rb', before: /^end/ do <<-RUBY.gsub(/^ {6}/, '')
+        get '/about' => 'high_voltage/pages#about', id: 'about'
+        RUBY
+      end
+    end
+
+    # Do this last
+    def rake_db_setup
+      rake 'db:migrate'
+      rake 'db:seed'
+    end
+
+    ###############################
+    # OVERRIDE SUSPENDERS METHODS #
+    ###############################
 
     def gemfile
       template '../templates/Gemfile.erb', 'Gemfile'
@@ -147,7 +302,6 @@ RUBY
     def set_ruby_to_version_being_used
       create_file '.ruby-version', "#{Voyage::RUBY_VERSION}\n"
     end
-
 
     # --------------------------------
     # setup_test_environment overrides
