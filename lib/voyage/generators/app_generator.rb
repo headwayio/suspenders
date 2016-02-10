@@ -31,10 +31,11 @@ module Suspenders
       invoke :generate_date_time_formats
       invoke :generate_ruby_version_and_gemset
       invoke :generate_data_migrations
-      invoke :add_about_page_through_high_voltage
+      invoke :add_high_voltage_static_pages
 
       # Do these last
       invoke :rake_db_setup
+      invoke :configure_rvm_prepend_bin_to_path
       invoke :actually_setup_spring
       invoke :bon_voyage
       super
@@ -68,12 +69,16 @@ module Suspenders
       build :generate_data_migrations
     end
 
-    def add_about_page_through_high_voltage
-      build :add_about_page_through_high_voltage
+    def add_high_voltage_static_pages
+      build :add_high_voltage_static_pages
     end
 
     def rake_db_setup
       build :rake_db_setup
+    end
+
+    def configure_rvm_prepend_bin_to_path
+      build :configure_rvm_prepend_bin_to_path
     end
 
     def setup_spring

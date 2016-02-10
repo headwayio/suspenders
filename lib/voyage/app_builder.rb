@@ -59,14 +59,15 @@ module Suspenders
           replace_in_file 'spec/factories/users.rb',
             'last_name "MyString"', 'last_name { Faker::Name.last_name }'
 
-          inject_into_file 'spec/factories/users.rb', before: /^  end/ do <<-RUBY.gsub(/^ {8}/, '')
+          inject_into_file 'spec/factories/users.rb', before: /^  end/ do <<-'RUBY'.gsub(/^ {8}/, '')
             password 'password'
-            \n
+            sequence(:email) { |n| "user_#{n}@example.com" }
+
             trait :admin do
               roles [:admin]
               first_name 'Admin'
               last_name 'User'
-              sequence(:email) { |n| "admin_\#{n}@example.com" }
+              sequence(:email) { |n| "admin_#{n}@example.com" }
             end
             RUBY
           end
@@ -86,7 +87,6 @@ module Suspenders
         customize_application_controller_for_devise(adding_first_and_last_name)
         customize_resource_controller_for_devise(adding_first_and_last_name)
         add_views_for_devise_resource(adding_first_and_last_name)
-        add_root_definition_to_routes_for_devise_resource
         authorize_devise_resource_for_index_action
         add_canard_roles_to_devise_resource
         update_devise_initializer
@@ -178,17 +178,25 @@ module Suspenders
       template '../templates/users_index.html.slim.erb', 'app/views/users/index.html.slim', config
     end
 
-    def add_root_definition_to_routes_for_devise_resource
-      inject_into_file 'config/routes.rb', before: /^end/ do <<-RUBY.gsub(/^ {6}/, '')
-        root "users#index"
-        RUBY
-      end
-    end
-
     def authorize_devise_resource_for_index_action
       generate "canard:ability user can:manage:user cannot:destroy:user"
       generate "canard:ability admin can:destroy:user"
+
+      %w(admins users).each do |resource_name|
+        replace_in_file "spec/abilities/#{resource_name}_spec.rb", 'Factory.create', 'build_stubbed'
+        replace_in_file "spec/abilities/#{resource_name}_spec.rb", "require_relative '../spec_helper'", "require 'rails_helper'"
+        replace_in_file "spec/abilities/#{resource_name}_spec.rb", 'require "cancan/matchers"', "require_relative '../support/matchers/custom_cancan'"
+        # NOTE: (2016-02-09) jonk => this replaces both should and should_not and results in is_expected.to_not in the latter case
+        replace_in_file "spec/abilities/#{resource_name}_spec.rb", 'should', "is_expected.to"
+      end
+
+      replace_in_file 'spec/abilities/users_spec.rb', ':user_user', ':user'
+      replace_in_file 'spec/abilities/admins_spec.rb', ':admin_user', ':user, :admin'
+      replace_in_file 'spec/abilities/admins_spec.rb', '@user = build_stubbed(:user, :admin)', '@admin = build_stubbed(:user, :admin)'
+      replace_in_file 'spec/abilities/admins_spec.rb', 'subject { Ability.new(@user) }', 'subject { Ability.new(@admin) }'
+
       generate "migration add_roles_mask_to_users roles_mask:integer"
+      template '../templates/custom_cancan_matchers.rb', 'spec/support/matchers/custom_cancan.rb'
     end
 
     def add_canard_roles_to_devise_resource
@@ -254,13 +262,23 @@ module Suspenders
 
     def generate_data_migrations
       generate 'data_migrations:install'
+
+      empty_directory_with_keep_file 'db/data_migrate'
     end
 
-    def add_about_page_through_high_voltage
-      template '../templates/about.html', "app/views/pages/about.html.#{@@use_slim ? 'slim' : 'erb'}"
+    def add_high_voltage_static_pages
+      template '../templates/about.html.erb', "app/views/pages/about.html.#{@@use_slim ? 'slim' : 'erb'}"
+      template '../templates/welcome.html.erb', "app/views/pages/welcome.html.erb"
 
       inject_into_file 'config/routes.rb', before: /^end/ do <<-RUBY.gsub(/^ {6}/, '')
-        get '/about' => 'high_voltage/pages#about', id: 'about'
+        root 'high_voltage/pages#show', id: 'welcome'
+        RUBY
+      end
+
+      create_file 'config/initializers/high_voltage.rb' do <<-RUBY.gsub(/^ {8}/, '')
+        HighVoltage.configure do |config|
+          config.route_drawer = HighVoltage::RouteDrawers::Root
+        end
         RUBY
       end
     end
@@ -268,20 +286,35 @@ module Suspenders
     # Do this last
     def rake_db_setup
       rake 'db:migrate'
-      rake 'db:seed'
+      rake 'db:seed' if File.exist?('config/initializers/devise.rb')
+    end
+
+    def configure_rvm_prepend_bin_to_path
+      run "rm -f $rvm_path/hooks/after_cd_bundler"
+
+      run "touch $rvm_path/hooks/after_cd_bundler"
+
+      git_safe_dir = <<-RUBY.gsub(/^ {8}/, '')
+        #!/usr/bin/env bash
+        export PATH=".git/safe/../../bin:$PATH"
+        RUBY
+
+      run "echo '#{git_safe_dir}' >> $rvm_path/hooks/after_cd_bundler"
+
+      run 'chmod +x $rvm_path/hooks/after_cd_bundler'
+
+      run 'mkdir -p .git/safe'
     end
 
     ###############################
     # OVERRIDE SUSPENDERS METHODS #
     ###############################
-
     def gemfile
       template '../templates/Gemfile.erb', 'Gemfile'
     end
 
     def configure_generators
       config = <<-RUBY.gsub(/^ {4}/, '')
-        \n
         config.generators do |g|
           g.helper false
           g.javascript_engine false
@@ -293,7 +326,6 @@ module Suspenders
           g.fixture_replacement :factory_girl, dir: 'spec/factories'
           g.template_engine :slim
         end
-        \n
       RUBY
 
       inject_into_class 'config/application.rb', 'Application', config
@@ -350,5 +382,10 @@ module Suspenders
     # -----------------
     # End Configure App
     # -----------------
+
+
+    def remove_config_comment_lines
+      # NOTE: (2016-02-09) jonk => don't want this
+    end
   end
 end
