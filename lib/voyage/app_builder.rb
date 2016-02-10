@@ -101,14 +101,14 @@ module Suspenders
       %w(edit new).each do |file|
         if @@use_slim
           file_path = "app/views/devise/registrations/#{file}.html.slim"
-          inject_into_file file_path, before: "    = f.input :email, required: true, autofocus: true" do <<-'RUBY'.gsub(/^ {6}/, '')
+          inject_into_file file_path, before: "    = f.input :email, required: true, autofocus: true" do <<-'RUBY'.gsub(/^ {8}/, '')
             = f.input :first_name, required: true, autofocus: true
             = f.input :last_name, required: true
             RUBY
           end
         else
           file_path = "app/views/devise/registrations/#{file}.html.erb"
-          inject_into_file file_path, before: "    <%= f.input :email, required: true, autofocus: true %>" do <<-'RUBY'.gsub(/^ {6}/, '')
+          inject_into_file file_path, before: "    <%= f.input :email, required: true, autofocus: true %>" do <<-'RUBY'.gsub(/^ {8}/, '')
             <%= f.input :first_name, required: true, autofocus: true %>
             <%= f.input :last_name, required: true %>
             RUBY
