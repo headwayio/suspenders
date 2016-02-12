@@ -283,6 +283,64 @@ module Suspenders
       end
     end
 
+
+    # -------------------------
+    # ADDING REFILLS COMPONENTS
+    # -------------------------
+
+    def generate_refills
+      if agree?('Would you like to install default Refill components? (Y/n)')
+        bundle_command 'exec rails generate refills:import navigation'
+        bundle_command 'exec rails generate refills:import footer'
+
+        convert_refill_views if @@use_slim
+        add_refills_to_layout
+        add_refills_to_stylesheets
+      end
+    end
+
+    def convert_refill_views
+      inside('lib') do # arbitrary, run in context of newly generated app
+        run "erb2slim '../app/views/refills' '../app/views/refills'"
+        run "erb2slim -d '../app/views/refills'"
+      end
+    end
+
+    def add_refills_to_layout
+      if @@use_slim
+        inject_into_file 'app/views/layouts/application.html.slim', before: "  = yield" do <<-RUBY.gsub(/^ {8}/, '')
+          = render "refills/navigation"
+          RUBY
+        end
+        inject_into_file 'app/views/layouts/application.html.slim', before: "  = render \"javascript\"" do <<-RUBY.gsub(/^ {8}/, '')
+          = render "refills/footer"
+          RUBY
+        end
+      else
+        inject_into_file 'app/views/layouts/application.html.erb', before: "  <%= yield %>" do <<-RUBY.gsub(/^ {8}/, '')
+          <%= render "refills/navigation" %>
+          RUBY
+        end
+        inject_into_file 'app/views/layouts/application.html.erb', before: '  <%= render "\javascript\" %>' do <<-RUBY.gsub(/^ {8}/, '')
+          <%= render "refills/footer" %>
+          RUBY
+        end
+      end
+    end
+
+    def add_refills_to_stylesheets
+      inject_into_file 'app/assets/stylesheets/application.scss', after: "@import \"refills/flashes\";"  do <<-RUBY.gsub(/^ {8}/, '')
+        \n@import "refills/navigation";
+        @import "refills/footer";
+        RUBY
+      end
+    end
+
+    # -------------------------
+    # ADDING REFILLS COMPONENTS
+    # -------------------------
+
+
     # Do this last
     def rake_db_setup
       rake 'db:migrate'

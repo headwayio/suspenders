@@ -32,6 +32,7 @@ module Suspenders
       invoke :generate_ruby_version_and_gemset
       invoke :generate_data_migrations
       invoke :add_high_voltage_static_pages
+      invoke :generate_refills
 
       # Do these last
       invoke :rake_db_setup
@@ -75,6 +76,10 @@ module Suspenders
 
     def rake_db_setup
       build :rake_db_setup
+    end
+
+    def generate_refills
+      build :generate_refills
     end
 
     def configure_rvm_prepend_bin_to_path
