@@ -304,7 +304,6 @@ module Suspenders
     # -------------------------
     # ADDING REFILLS COMPONENTS
     # -------------------------
-
     def generate_refills
       if @@accept_defaults || agree?('Would you like to install default Refill components? (Y/n)')
         bundle_command 'exec rails generate refills:import navigation'
@@ -352,11 +351,27 @@ module Suspenders
         RUBY
       end
     end
+    # -----------------------------
+    # END ADDING REFILLS COMPONENTS
+    # -----------------------------
 
-    # -------------------------
-    # ADDING REFILLS COMPONENTS
-    # -------------------------
+    def generate_test_environment
+      template '../templates/controller_helpers.rb', 'spec/support/controller_helpers.rb'
+      template '../templates/simplecov.rb', '.simplecov'
+    end
 
+    def update_test_environment
+      inject_into_file 'spec/support/factory_girl.rb', before: /^end/ do <<-RUBY.gsub(/^ {6}/, '')
+
+        # Spring doesn't reload factory_girl
+        config.before(:all) do
+          FactoryGirl.reload
+        end
+        RUBY
+      end
+
+      template "../templates/rails_helper.rb.erb", "spec/rails_helper.rb", force: true
+    end
 
     # Do this last
     def rake_db_setup
@@ -411,7 +426,6 @@ module Suspenders
     # --------------------------------
     def generate_factories_file
       # NOTE: (2016-02-03) jonk => don't want this
-      # copy_file "factories.rb", "spec/factories.rb"
     end
 
     def configure_ci
@@ -424,7 +438,6 @@ module Suspenders
 
     def configure_capybara_webkit
       # NOTE: (2016-02-03) jonk => don't want this
-      # copy_file "capybara_webkit.rb", "spec/support/capybara_webkit.rb"
     end
     # ------------------------------------
     # End setup_test_environment overrides
@@ -443,12 +456,10 @@ module Suspenders
 
     def configure_puma
       # NOTE: (2016-02-03) jonk => don't want this
-      # copy_file "puma.rb", "config/puma.rb"
     end
 
     def set_up_forego
       # NOTE: (2016-02-03) jonk => don't want this
-      # copy_file "Procfile", "Procfile"
     end
     # -----------------
     # End Configure App

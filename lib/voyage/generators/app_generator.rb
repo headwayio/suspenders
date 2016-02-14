@@ -38,6 +38,9 @@ module Suspenders
       invoke :generate_data_migrations
       invoke :add_high_voltage_static_pages
       invoke :generate_refills
+      invoke :generate_test_environment
+      invoke :update_test_environment
+
 
       # Do these last
       invoke :rake_db_setup
@@ -85,6 +88,14 @@ module Suspenders
 
     def generate_refills
       build :generate_refills
+    end
+
+    def generate_test_environment
+      build :generate_test_environment
+    end
+
+    def update_test_environment
+      build :update_test_environment
     end
 
     def configure_rvm_prepend_bin_to_path

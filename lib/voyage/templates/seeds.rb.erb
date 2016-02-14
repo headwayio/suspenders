@@ -22,10 +22,7 @@ production_tables_to_seed =
     <%= config[:using_devise] ? 'admin_user' : 'factory_name' %>
   )
 
-test_tables_to_seed =
-  %w(
-    <%= config[:using_devise] ? 'admin_user' : 'factory_name' %>
-  )
+test_tables_to_seed = %w()
 
 if ENV['TABLES'].present?
   # Allow overriding which tables we seed if the TABLES env var is present
@@ -46,7 +43,7 @@ else
     end
 end
 
-raise StandardError.new, message: 'No Tables Specified' if tables.blank?
+# raise StandardError.new, message: 'No Tables Specified' if tables.blank?
 
 tables.each do |table_name|
   eval("Seeder.#{table_name}")
