@@ -7,8 +7,16 @@ module Suspenders
       response.empty? || %w(y yes).include?(response.downcase.strip)
     end
 
+    def accept_defaults
+      if agree?('Would you like to accept all defaults? [slim, devise w/ first & last name, refills nav & footer] (Y/n)')
+        @@accept_defaults = true
+      else
+        @@accept_defaults = false
+      end
+    end
+
     def use_slim
-      if agree?('Would you like to use slim? (Y/n)')
+      if @@accept_defaults || agree?('Would you like to use slim? (Y/n)')
         @@use_slim = true
         run 'gem install html2slim'
 
@@ -46,10 +54,10 @@ module Suspenders
     # DEVISE SETUP
     # ------------
     def install_devise
-      if agree?('Would you like to install Devise? (Y/n)')
+      if @@accept_defaults || agree?('Would you like to install Devise? (Y/n)')
         bundle_command 'exec rails generate devise:install'
 
-        if agree?("Would you like to add first_name and last_name to the devise model? (Y/n)")
+        if @@accept_defaults || agree?("Would you like to add first_name and last_name to the devise model? (Y/n)")
           adding_first_and_last_name = true
 
           bundle_command "exec rails generate resource user first_name:string last_name:string"
@@ -58,19 +66,6 @@ module Suspenders
             'first_name "MyString"', 'first_name { Faker::Name.first_name }'
           replace_in_file 'spec/factories/users.rb',
             'last_name "MyString"', 'last_name { Faker::Name.last_name }'
-
-          inject_into_file 'spec/factories/users.rb', before: /^  end/ do <<-'RUBY'.gsub(/^ {8}/, '')
-            password 'password'
-            sequence(:email) { |n| "user_#{n}@example.com" }
-
-            trait :admin do
-              roles [:admin]
-              first_name 'Admin'
-              last_name 'User'
-              sequence(:email) { |n| "admin_#{n}@example.com" }
-            end
-            RUBY
-          end
         end
 
         bundle_command "exec rails generate devise user"
@@ -91,6 +86,7 @@ module Suspenders
         add_canard_roles_to_devise_resource
         update_devise_initializer
         add_sign_in_and_sign_out_routes_for_devise
+        customize_user_factory(adding_first_and_last_name)
         generate_seeder_templates(using_devise: true)
       else
         generate_seeder_templates(using_devise: false)
@@ -167,7 +163,7 @@ module Suspenders
       unless adding_first_and_last_name
         inject_into_file 'config/routes.rb', after: '  devise_for :users' do <<-RUBY.gsub(/^ {8}/, '')
           \n
-          resources :#{controller_name}
+          resources :users
           RUBY
         end
       end
@@ -233,6 +229,27 @@ module Suspenders
         RUBY
       end
     end
+
+    def customize_user_factory(adding_first_and_last_name)
+      inject_into_file 'spec/factories/users.rb', before: /^  end/ do <<-'RUBY'.gsub(/^ {4}/, '')
+        password 'password'
+        sequence(:email) { |n| "user_#{n}@example.com" }
+
+        trait :admin do
+          roles [:admin]
+          sequence(:email) { |n| "admin_#{n}@example.com" }
+        end
+        RUBY
+      end
+
+      if adding_first_and_last_name
+        inject_into_file 'spec/factories/users.rb', after: /roles \[:admin\]\n/ do <<-'RUBY'.gsub(/^ {4}/, '')
+          first_name 'Admin'
+          last_name 'User'
+          RUBY
+        end
+      end
+    end
     # ----------------
     # END DEVISE SETUP
     # ----------------
@@ -289,7 +306,7 @@ module Suspenders
     # -------------------------
 
     def generate_refills
-      if agree?('Would you like to install default Refill components? (Y/n)')
+      if @@accept_defaults || agree?('Would you like to install default Refill components? (Y/n)')
         bundle_command 'exec rails generate refills:import navigation'
         bundle_command 'exec rails generate refills:import footer'
 
@@ -308,28 +325,28 @@ module Suspenders
 
     def add_refills_to_layout
       if @@use_slim
-        inject_into_file 'app/views/layouts/application.html.slim', before: "  = yield" do <<-RUBY.gsub(/^ {8}/, '')
-          = render "refills/navigation"
+        inject_into_file 'app/views/layouts/application.html.slim', before: '  = yield' do <<-RUBY.gsub(/^ {8}/, '')
+          = render 'refills/navigation'
           RUBY
         end
-        inject_into_file 'app/views/layouts/application.html.slim', before: "  = render \"javascript\"" do <<-RUBY.gsub(/^ {8}/, '')
-          = render "refills/footer"
+        inject_into_file 'app/views/layouts/application.html.slim', before: '  = render "javascript"' do <<-RUBY.gsub(/^ {8}/, '')
+          = render 'refills/footer'
           RUBY
         end
       else
-        inject_into_file 'app/views/layouts/application.html.erb', before: "  <%= yield %>" do <<-RUBY.gsub(/^ {8}/, '')
-          <%= render "refills/navigation" %>
+        inject_into_file 'app/views/layouts/application.html.erb', before: '  <%= yield %>' do <<-RUBY.gsub(/^ {8}/, '')
+          <%= render 'refills/navigation' %>
           RUBY
         end
-        inject_into_file 'app/views/layouts/application.html.erb', before: '  <%= render "\javascript\" %>' do <<-RUBY.gsub(/^ {8}/, '')
-          <%= render "refills/footer" %>
+        inject_into_file 'app/views/layouts/application.html.erb', before: '  <%= render "javascript" %>' do <<-RUBY.gsub(/^ {8}/, '')
+          <%= render 'refills/footer' %>
           RUBY
         end
       end
     end
 
     def add_refills_to_stylesheets
-      inject_into_file 'app/assets/stylesheets/application.scss', after: "@import \"refills/flashes\";"  do <<-RUBY.gsub(/^ {8}/, '')
+      inject_into_file 'app/assets/stylesheets/application.scss', after: '@import "refills/flashes";'  do <<-RUBY.gsub(/^ {8}/, '')
         \n@import "refills/navigation";
         @import "refills/footer";
         RUBY
@@ -367,10 +384,6 @@ module Suspenders
     ###############################
     # OVERRIDE SUSPENDERS METHODS #
     ###############################
-    def gemfile
-      template '../templates/Gemfile.erb', 'Gemfile'
-    end
-
     def configure_generators
       config = <<-RUBY.gsub(/^ {4}/, '')
         config.generators do |g|

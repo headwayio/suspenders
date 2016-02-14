@@ -8,6 +8,7 @@ module Suspenders
 
     def self.start
       preflight_check
+      accept_defaults
 
       super
     end
@@ -20,6 +21,10 @@ module Suspenders
         puts "Skipping install. Please create a ruby gemset first!"
         exit 1
       end
+    end
+
+    def self.accept_defaults
+      Suspenders::AppBuilder.new.accept_defaults
     end
 
     def finish_template
