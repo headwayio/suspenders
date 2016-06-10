@@ -1,8 +1,48 @@
-master (unreleased)
+master
 
+1.39.0 (May 25, 2016)
+
+* Update to Ruby 2.3.1
+* Make new apps "deployable to Heroku" by default.
+* Make the help text returned when running `suspenders -h` Suspenders specific
+* Bugfix: Configure `static_cache_control` in production environment
+* Replace NewRelic with Skylight
+* Drop initializer for disabling XML parser
+* Start moving suspenders features into different Rails Generators
+* Set default `application_host` in Heroku
+* Update the viewport meta tag
+
+1.38.1 (April 20, 2016)
+
+* Bugfix: add bitters as suspenders’ dependency back.
+
+1.38.0 (April 15, 2016)
+
+* Update bourbon to `v5.0.0.beta.5`
+* Drops staging environment in favor of configuration through env variables
+* Bugfix: failing migrations were not making Heroku deploys fail
+
+1.37.0 (March 13, 2016)
+
+* Remove `RAILS_ENV` definitions
+* Set development `action_mailer.delivery_method` to `:file`
+  so that mails are copied to `./tmp/mails/` directory for easy development
+  access.
+* Update Bourbon to v5.0.0.beta.3
+* Update Bitters to v1.3
+* Update Autoprefixer config, drop support for IE 9, IE 10 and iOS 7
+* Better db support in linux environments
+* Replaces coffeescript with babel
+* Update CSS tests to ignore transitions
+
+1.36.0 (February 26, 2016)
+
+* Update Bitters to v1.2
+* Remove deprecated `fix_i18n_deprecation_warning` method
 * Switch from Airbrake to Honeybadger
 * Generate applications with `rack_mini_profiler` (disabled by default, enabled
   by setting `RACK_MINI_PROFILER=1`)
+* Heroku Pipelines bug fixes
 
 1.35.0 (December 30, 2015)
 

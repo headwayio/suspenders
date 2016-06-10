@@ -5,6 +5,7 @@ RSpec.describe "Suspend a new project with default configuration" do
     drop_dummy_database
     remove_project_directory
     run_suspenders
+    setup_app_dependencies
   end
 
   it "uses custom Gemfile" do
@@ -26,14 +27,6 @@ RSpec.describe "Suspend a new project with default configuration" do
         expect(`rake`).to include('0 failures')
       end
     end
-  end
-
-  it "inherits staging config from production" do
-    staging_file = IO.read("#{project_path}/config/environments/staging.rb")
-    config_stub = "Rails.application.configure do"
-
-    expect(staging_file).to match(/^require_relative "production"/)
-    expect(staging_file).to match(/#{config_stub}/), staging_file
   end
 
   it "creates .ruby-version from Suspenders .ruby-version" do
@@ -99,14 +92,6 @@ RSpec.describe "Suspend a new project with default configuration" do
       to exist("#{project_path}/config/initializers/rack_mini_profiler.rb")
   end
 
-  it "ensures newrelic.yml reads NewRelic license from env" do
-    newrelic_file = IO.read("#{project_path}/config/newrelic.yml")
-
-    expect(newrelic_file).to match(
-      /license_key: "<%= ENV\["NEW_RELIC_LICENSE_KEY"\] %>"/
-    )
-  end
-
   it "records pageviews through Segment if ENV variable set" do
     expect(analytics_partial).
       to include(%{<% if ENV["SEGMENT_KEY"] %>})
@@ -127,6 +112,13 @@ RSpec.describe "Suspend a new project with default configuration" do
 
     expect(result).to match(
       /^ +config.quiet_assets = true$/
+    )
+  end
+
+  it "configures static_cache_control in production" do
+    prod_env_file = IO.read("#{project_path}/config/environments/production.rb")
+    expect(prod_env_file).to match(
+      /config.static_cache_control = "public, max-age=.+"/,
     )
   end
 
@@ -153,13 +145,19 @@ RSpec.describe "Suspend a new project with default configuration" do
   it "configs :test email delivery method for development" do
     dev_env_file = IO.read("#{project_path}/config/environments/development.rb")
     expect(dev_env_file).
-      to match(/^ +config.action_mailer.delivery_method = :test$/)
+      to match(/^ +config.action_mailer.delivery_method = :file$/)
   end
 
   it "uses APPLICATION_HOST, not HOST in the production config" do
     prod_env_file = IO.read("#{project_path}/config/environments/production.rb")
     expect(prod_env_file).to match(/"APPLICATION_HOST"/)
     expect(prod_env_file).not_to match(/"HOST"/)
+  end
+
+  it "configures email interceptor in smtp config" do
+    smtp_file = IO.read("#{project_path}/config/smtp.rb")
+    expect(smtp_file).
+      to match(/RecipientInterceptor.new\(ENV\["EMAIL_RECIPIENTS"\]\)/)
   end
 
   it "configures language in html element" do
@@ -224,8 +222,46 @@ RSpec.describe "Suspend a new project with default configuration" do
     expect(File).to exist("#{project_path}/spec/factories.rb")
   end
 
+  it "creates review apps setup script" do
+    bin_setup_path = "#{project_path}/bin/setup_review_app"
+    bin_setup = IO.read(bin_setup_path)
+
+    expect(bin_setup).to include("heroku run rake db:migrate --exit-code "\
+                                 "--app #{app_name.dasherize}-staging-pr-$1")
+    expect(bin_setup).to include("heroku ps:scale worker=1 "\
+                                 "--app #{app_name.dasherize}-staging-pr-$1")
+    expect(bin_setup).to include("heroku restart "\
+                                 "--app #{app_name.dasherize}-staging-pr-$1")
+    expect(File.stat(bin_setup_path)).to be_executable
+  end
+
+  it "creates deploy script" do
+    bin_deploy_path = "#{project_path}/bin/deploy"
+    bin_deploy = IO.read(bin_deploy_path)
+
+    expect(bin_deploy).to include("heroku run rake db:migrate --exit-code")
+    expect(File.stat(bin_deploy_path)).to be_executable
+  end
+
+  it "creates heroku application manifest file with application name in it" do
+    app_json_file = IO.read("#{project_path}/app.json")
+
+    expect(app_json_file).to match(/"name":"#{app_name.dasherize}"/)
+  end
+
+  it "sets up heroku specific gems" do
+    gemfile_file = IO.read("#{project_path}/Gemfile")
+
+    expect(gemfile_file).to include %{gem "rails_stdout_logging"}
+  end
+
   def app_name
     SuspendersTestHelpers::APP_NAME
+  end
+
+  it "adds high_voltage" do
+    gemfile = IO.read("#{project_path}/Gemfile")
+    expect(gemfile).to match(/high_voltage/)
   end
 
   def analytics_partial

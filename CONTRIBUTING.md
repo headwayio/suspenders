@@ -13,6 +13,9 @@ Set up your machine:
 
     ./bin/setup
 
+If you're having trouble installing `capybara-webkit` check their [installation
+instructions](https://github.com/thoughtbot/capybara-webkit#qt-dependency-and-installation-issues).
+
 Make sure the tests pass:
 
     rake
@@ -25,6 +28,9 @@ Make the tests pass:
 [style]: https://github.com/thoughtbot/guides/tree/master/style
 
     rake
+
+Mention how your changes affect the project to other developers and users in the
+`NEWS.md` file.
 
 Write a [good commit message][commit].
 Push to your fork.

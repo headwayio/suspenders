@@ -42,7 +42,6 @@ It includes application gems like:
 * [Honeybadger](https://honeybadger.io) for exception notification
 * [jQuery Rails](https://github.com/rails/jquery-rails) for jQuery
 * [Neat](https://github.com/thoughtbot/neat) for semantic grids
-* [New Relic RPM](https://github.com/newrelic/rpm) for monitoring performance
 * [Normalize](https://necolas.github.io/normalize.css/) for resetting browser styles
 * [Postgres](https://github.com/ged/ruby-pg) for access to the Postgres database
 * [Rack Canonical Host](https://github.com/tylerhunt/rack-canonical-host) to
@@ -55,6 +54,7 @@ It includes application gems like:
   and patterns based on Bourbon, Neat and Bitters
 * [Simple Form](https://github.com/plataformatec/simple_form) for form markup
   and style
+* [Skylight](https://www.skylight.io/) for monitoring performance
 * [Title](https://github.com/calebthompson/title) for storing titles in
   translations
 * [Puma](https://github.com/puma/puma) to serve HTTP requests
@@ -129,7 +129,7 @@ This:
 
 * Creates a staging and production Heroku app
 * Sets them as `staging` and `production` Git remotes
-* Configures staging with `RACK_ENV` and `RAILS_ENV` environment variables set
+* Configures staging with `RACK_ENV` environment variable set
   to `staging`
 * Adds the [Rails Stdout Logging][logging-gem] gem
   to configure the app to log to standard out,
@@ -144,7 +144,7 @@ You can optionally specify alternate Heroku flags:
 
     suspenders app \
       --heroku true \
-      --heroku-flags "--region eu --addons newrelic,sendgrid,ssl"
+      --heroku-flags "--region eu --addons sendgrid,ssl"
 
 See all possible Heroku flags:
 

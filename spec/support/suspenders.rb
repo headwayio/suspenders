@@ -10,12 +10,33 @@ module SuspendersTestHelpers
   end
 
   def run_suspenders(arguments = nil)
+    arguments = "--path=#{root_path} #{arguments}"
     Dir.chdir(tmp_path) do
       Bundler.with_clean_env do
         add_fakes_to_path
         `
           #{suspenders_bin} #{APP_NAME} #{arguments}
         `
+      end
+    end
+  end
+
+  def suspenders_help_command
+    Dir.chdir(tmp_path) do
+      Bundler.with_clean_env do
+        `
+          #{suspenders_bin} -h
+        `
+      end
+    end
+  end
+
+  def setup_app_dependencies
+    if File.exist?(project_path)
+      Dir.chdir(project_path) do
+        Bundler.with_clean_env do
+          `bundle check || bundle install`
+        end
       end
     end
   end
@@ -36,6 +57,10 @@ module SuspendersTestHelpers
 
   def project_path
     @project_path ||= Pathname.new("#{tmp_path}/#{APP_NAME}")
+  end
+
+  def usage_file
+    @usage_path ||= File.join(root_path, "USAGE")
   end
 
   private
