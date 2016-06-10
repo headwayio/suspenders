@@ -269,10 +269,6 @@ module Suspenders
         "Dir[File.join(Rails.root, 'lib', '**', '*.rb')].each { |l| require l }\n"
     end
 
-    def generate_date_time_formats
-      template '../templates/date_time_formats.rb', 'config/initializers/date_time_formats.rb'
-    end
-
     def generate_ruby_version_and_gemset
       create_file '.ruby-gemset', "#{app_name}\n"
     end

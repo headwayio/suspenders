@@ -33,7 +33,6 @@ module Suspenders
       invoke :install_devise
       invoke :customize_application_js
       invoke :require_files_in_lib
-      invoke :generate_date_time_formats
       invoke :generate_ruby_version_and_gemset
       invoke :generate_data_migrations
       invoke :add_high_voltage_static_pages
@@ -64,10 +63,6 @@ module Suspenders
 
     def require_files_in_lib
       build :require_files_in_lib
-    end
-
-    def generate_date_time_formats
-      build :generate_date_time_formats
     end
 
     def generate_ruby_version_and_gemset
