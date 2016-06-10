@@ -77,10 +77,6 @@ module Suspenders
       build :add_high_voltage_static_pages
     end
 
-    def rake_db_setup
-      build :rake_db_setup
-    end
-
     def generate_refills
       build :generate_refills
     end
@@ -91,6 +87,10 @@ module Suspenders
 
     def update_test_environment
       build :update_test_environment
+    end
+
+    def rake_db_setup
+      build :rake_db_setup
     end
 
     def configure_rvm_prepend_bin_to_path
