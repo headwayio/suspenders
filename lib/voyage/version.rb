@@ -1,8 +1,8 @@
 module Voyage
-  RAILS_VERSION = "~> 4.2.0".freeze
+  RAILS_VERSION = "~> 4.2".freeze
   RUBY_VERSION = IO.
     read("#{File.dirname(__FILE__)}/../../.ruby-version").
     strip.
     freeze
-  VERSION = "1.39.0".freeze
+  VERSION = '1.0'.freeze
 end
