@@ -5,13 +5,10 @@ ruby "<%= Voyage::RUBY_VERSION %>"
 #ruby-gemset=<%= @app_name %>
 
 gem "autoprefixer-rails"
-gem "bourbon", "~> 4.2.0"
 gem "coffee-rails", "~> 4.1.0"
 gem "delayed_job_active_record"
 gem "flutie"
-gem "high_voltage"
 gem "jquery-rails"
-gem "neat", "~> 1.7.0"
 gem "normalize-rails", "~> 3.0.0"
 gem "pg"
 gem "rack-canonical-host"
@@ -29,6 +26,7 @@ gem 'font-awesome-rails'
 gem 'dynamic_form' # for custom messages without the database column
 gem 'nested_form_fields' # Dynamically add and remove nested has_many association fields in a Ruby on Rails form
 gem 'devise'
+gem 'suspenders', '1.40'
 
 gem 'turbolinks'
 gem 'jquery-turbolinks'
@@ -59,7 +57,6 @@ gem 'whenever-web'
 
 group :development do
   gem "quiet_assets"
-  gem "refills"
   gem "spring"
   gem "spring-commands-rspec"
   gem "web-console"
@@ -71,7 +68,7 @@ group :development do
   gem 'better_errors' # A better error page for rails when a local 500 (or similar) is thrown
   gem 'binding_of_caller' # REPL in better_errors to debug in the browser at the point at which it failed
   gem 'meta_request' # for chrome rails console plugin found here: https://chrome.google.com/webstore/detail/railspanel/gjpfobpafnhjhbajcjgccbbdofdckggg?hl=en-US
-  gem 'bitters', '~> 1.2'
+  gem 'bitters', '~> 1.3'
   gem 'redcarpet' # used to render the readme inside a static welcome page from the high_voltage gem
 end
 

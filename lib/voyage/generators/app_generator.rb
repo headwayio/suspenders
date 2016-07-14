@@ -1,11 +1,5 @@
 module Suspenders
   class AppGenerator < Rails::Generators::AppGenerator
-    class_option :skip_turbolinks, type: :boolean, default: false,
-      desc: "Skip turbolinks gem"
-
-    class_option :skip_bundle, type: :boolean, aliases: "-B", default: true,
-      desc: "Don't run bundle install"
-
     def self.start
       preflight_check
       accept_defaults
@@ -113,6 +107,7 @@ module Suspenders
 
     def bon_voyage
       say 'Congratulations! You just pulled our suspenders, Headway style!'
+      say honeybadger_outro
     end
   end
 end
