@@ -176,6 +176,33 @@ config.public_file_server.headers = {
       create_file '.ruby-version', "#{Suspenders::RUBY_VERSION}\n"
     end
 
+    def provide_shoulda_matchers_config
+      copy_file(
+        "shoulda_matchers_config_rspec.rb",
+        "spec/support/shoulda_matchers.rb"
+      )
+    end
+
+    def configure_spec_support_features
+      empty_directory_with_keep_file 'spec/system'
+      empty_directory_with_keep_file 'spec/support/system'
+    end
+
+    def configure_rspec
+      remove_file "spec/rails_helper.rb"
+      remove_file "spec/spec_helper.rb"
+      copy_file "rails_helper.rb", "spec/rails_helper.rb"
+      copy_file "spec_helper.rb", "spec/spec_helper.rb"
+    end
+
+    def configure_ci
+      template "circle.yml.erb", "circle.yml"
+    end
+
+    def configure_i18n_for_test_environment
+      copy_file "i18n.rb", "spec/support/i18n.rb"
+    end
+
     def configure_i18n_for_missing_translations
       raise_on_missing_translations_in("development")
       raise_on_missing_translations_in("test")

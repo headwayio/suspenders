@@ -1,0 +1,17 @@
+# This file should contain all the record creation needed to seed the database
+# with its default values.  The data can then be loaded with the rake db:seed
+# (or created alongside the db with db:setup).
+
+puts
+puts 'Seeding the database...'
+puts
+
+<% if config[:using_devise] %>
+User.with_deleted.each(&:really_destroy!)
+User.create(
+  email: 'admin@example.com',
+  roles: [:admin],
+  password: 'asdfjkl123',
+  password_confirmation: 'asdfjkl123',
+)
+<% end %>
