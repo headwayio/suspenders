@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
 
   s.description = <<-HERE
 Voyage is a fork of the suspenders base Rails project from thoughtbot. It
-is used by headway to get a jump start on a working app.
+is used by Headway to get a jump start on a working app.
   HERE
 
   s.email = 'development@headway.io'
