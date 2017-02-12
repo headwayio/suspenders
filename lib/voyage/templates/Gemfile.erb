@@ -24,38 +24,44 @@ gem "title"
 gem "uglifier"
 
 # Customizations
-gem 'responders' # respond to json/html/js more easily in controllers
-gem 'slim-rails' # templating
 gem 'font-awesome-rails'
-gem 'dynamic_form' # for custom messages without the database column
-gem 'nested_form_fields' # Dynamically add and remove nested has_many association fields in a Ruby on Rails form
-gem 'devise'
+gem 'slim-rails'
 
-gem 'turbolinks'
+# Javascript Tweaks
+gem 'gon' # pass variables betwween rails and javascript. Several examples in the application_controller.rb
 gem 'jquery-turbolinks'
 gem 'jquery-ui-rails'
 gem 'nprogress-rails' # Show request progress when a link is clicked
-gem 'gon' # pass variables betwween rails and javascript. Several examples in the application_controller.rb
+gem 'responders' # respond to json/html/js more easily in controllers
+gem 'turbolinks'
 
-gem 'cancancan' # authorization library
+# Authentication / Authorization
 gem 'canard', git: 'https://github.com/jondkinney/canard.git', branch: 'feature/fixed-generators-and-rails-5' # ties into cancancan, adds roles for the user
+gem 'cancancan' # authorization library
+gem 'devise'
 
+# Database Tweaks
+gem 'dynamic_form' # for custom messages without the database column
 gem 'friendly_id' # slugs in the url auto-generated
-gem 'paper_trail'
+gem 'nested_form_fields' # Dynamically add and remove nested has_many association fields in a Ruby on Rails form
+gem 'nondestructive_migrations' # data migrations go here, not in regular ActiveRecord migrations
+gem 'paper_trail' # version active record models and soft-delete by default
 gem 'settingslogic' # yaml settings (project wide, non-editable), this is implemented with the model Settings.rb
 
-# Want these here for debugging on production
-gem 'pry-byebug' # stepwise debugging inside pry
-gem 'pry-rails' # better REPL than irb
-gem 'pry-awesome_print' # make pry output legible
-gem 'pry-remote'
-
-gem 'nondestructive_migrations'
+# User Uploads
 gem 'carrierwave'
-gem 'mini_magick'
 gem 'fog'
+gem 'mini_magick'
+
+# Cron Jobs
 gem 'whenever', require: false # provides a clear syntax for writing and deploying cron jobs
 gem 'whenever-web'
+
+# Debugging (need at top level if we want pry-remote to work on a deployed prod server)
+gem 'pry-awesome_print' # make pry output legible
+gem 'pry-byebug' # stepwise debugging inside pry
+gem 'pry-rails' # better REPL than irb
+gem 'pry-remote' # Production debugging
 
 group :development do
   gem "listen"
@@ -65,13 +71,13 @@ group :development do
 
   # Customizations
   gem 'annotate' # annotate models automatically when rake db:migrate is called
-  gem 'rails-erd' # auto gen ERD Diagram of models in the app on rake db:migrate
-  gem 'zenflow', git: 'https://github.com/zencoder/zenflow.git'
   gem 'better_errors' # A better error page for rails when a local 500 (or similar) is thrown
   gem 'binding_of_caller' # REPL in better_errors to debug in the browser at the point at which it failed
-  gem 'meta_request' # for chrome rails console plugin found here: https://chrome.google.com/webstore/detail/railspanel/gjpfobpafnhjhbajcjgccbbdofdckggg?hl=en-US
   gem 'bitters', '~> 1.3'
+  gem 'meta_request' # for chrome rails console plugin found here: https://chrome.google.com/webstore/detail/railspanel/gjpfobpafnhjhbajcjgccbbdofdckggg?hl=en-US
+  gem 'rails-erd' # auto gen ERD Diagram of models in the app on rake db:migrate
   gem 'redcarpet' # used to render the readme inside a static welcome page from the high_voltage gem
+  gem 'zenflow', git: 'https://github.com/zencoder/zenflow.git'
 end
 
 group :development, :test do
@@ -86,11 +92,9 @@ group :development, :test do
 
   # Customizations
   gem 'faker' # provides auto generated names for factories, can be customized
-
+  gem 'letter_opener' # auto-open emails when they're sent
   gem 'rubocop'
   gem 'rubocop-rspec', require: false
-
-  gem 'letter_opener' # auto-open emails when they're sent
 end
 
 group :development, :staging do
@@ -109,10 +113,9 @@ group :test do
 
   # Customizations
   gem 'cadre' # highlights code coverage in vim
-
-  gem 'capybara'
-  gem 'poltergeist'
-  gem 'selenium-webdriver' # brew install chromedriver
+  gem 'capybara' # DSL for finding elements on a page during integration testing
+  gem 'poltergeist' # Headless browser, used in integration tests
+  gem 'selenium-webdriver' # `brew install chromedriver`, used for acceptance tests in an actual browser.
 end
 
 group :staging, :production do

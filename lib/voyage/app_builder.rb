@@ -17,6 +17,9 @@ module Suspenders
 
     def update_gemset_in_gemfile
       replace_in_file 'Gemfile', '#ruby-gemset', "#ruby-gemset=#{app_name}"
+
+      # Remove commented out lines from template
+      gsub_file('Gemfile', /^\s{2}\n/, '')
     end
 
     def use_slim
@@ -24,8 +27,10 @@ module Suspenders
         @@use_slim = true
         run 'gem install html2slim'
         update_application_layout_for_slim
+        update_application_rb_for_slim
       else
         @@use_slim = false
+        gsub_file('Gemfile', /^gem 'slim-rails'\n/, '')
       end
     end
 
@@ -86,6 +91,13 @@ module Suspenders
       RUBY
 
       replace_in_file 'app/views/layouts/application.html.slim', find, replace
+    end
+
+    def update_application_rb_for_slim
+      inject_into_file "config/application.rb", after: "     g.fixture_replacement :factory_girl, dir: 'spec/factories'\n" do <<-'RUBY'.gsub(/^ {2}/, '')
+        g.template_engine :slim
+        RUBY
+      end
     end
 
     # ------------
@@ -218,7 +230,14 @@ module Suspenders
 
     def add_views_for_devise_resource(adding_first_and_last_name)
       config = { adding_first_and_last_name: adding_first_and_last_name }
-      template '../templates/users_index.html.slim.erb', 'app/views/users/index.html.slim', config
+      template '../templates/users_index.html.erb', 'app/views/users/index.html.erb', config
+
+      if @@use_slim
+        inside('lib') do # arbitrary, run in context of newly generated app
+          run "erb2slim '../app/views/users' '../app/views/users'"
+          run "erb2slim -d '../app/views/users'"
+        end
+      end
     end
 
     def authorize_devise_resource_for_index_action
@@ -321,8 +340,12 @@ module Suspenders
     end
 
     def require_files_in_lib
-      create_file 'config/initializers/require_files_in_lib.rb',
-        "Dir[File.join(Rails.root, 'lib', '**', '*.rb')].each { |l| require l }\n"
+      create_file 'config/initializers/require_files_in_lib.rb' do <<-RUBY.gsub(/^ {8}/, '')
+        # rubocop:disable Rails/FilePath
+        Dir[File.join(Rails.root, 'lib', '**', '*.rb')].each { |l| require l }
+        # rubocop:enable Rails/FilePath
+        RUBY
+      end
     end
 
     def generate_ruby_version_and_gemset
@@ -351,6 +374,7 @@ module Suspenders
         RUBY
       end
     end
+
 
     # --------
     # TEMP FIX
@@ -507,6 +531,7 @@ module Suspenders
     ###############################
     def configure_generators
       config = <<-RUBY.gsub(/^ {4}/, '')
+
         config.generators do |g|
           g.helper false
           g.javascript_engine false
@@ -516,8 +541,8 @@ module Suspenders
           g.test_framework :rspec
           g.view_specs false
           g.fixture_replacement :factory_girl, dir: 'spec/factories'
-          g.template_engine :slim
         end
+
       RUBY
 
       inject_into_class 'config/application.rb', 'Application', config
