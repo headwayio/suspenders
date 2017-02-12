@@ -35,6 +35,7 @@ module Suspenders
       invoke :generate_refills
       invoke :generate_test_environment
       invoke :update_test_environment
+      invoke :add_rubocop_config
 
 
       # Do these last
@@ -91,6 +92,10 @@ module Suspenders
 
     def update_test_environment
       build :update_test_environment
+    end
+
+    def add_rubocop_config
+      build :add_rubocop_config
     end
 
     def rake_db_setup

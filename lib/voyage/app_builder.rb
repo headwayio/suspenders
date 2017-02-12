@@ -218,23 +218,14 @@ module Suspenders
     end
 
     def authorize_devise_resource_for_index_action
-      generate "canard:ability user can:manage:user cannot:destroy:user"
-      generate "canard:ability admin can:destroy:user"
+      generate 'canard:ability user can:manage:user cannot:destroy:user'
+      generate 'canard:ability admin can:destroy:user'
 
       %w(admins users).each do |resource_name|
-        replace_in_file "spec/abilities/#{resource_name}_spec.rb", 'Factory.create', 'build_stubbed'
-        replace_in_file "spec/abilities/#{resource_name}_spec.rb", "require_relative '../spec_helper'", "require 'rails_helper'"
-        replace_in_file "spec/abilities/#{resource_name}_spec.rb", 'require "cancan/matchers"', "require_relative '../support/matchers/custom_cancan'"
-        # NOTE: (2016-02-09) jonk => this replaces both should and should_not and results in is_expected.to_not in the latter case
-        replace_in_file "spec/abilities/#{resource_name}_spec.rb", 'should', "is_expected.to"
+        replace_in_file "spec/abilities/#{resource_name}_spec.rb", "require 'cancan/matchers'", "require_relative '../support/matchers/custom_cancan'"
       end
 
-      replace_in_file 'spec/abilities/users_spec.rb', ':user_user', ':user'
-      replace_in_file 'spec/abilities/admins_spec.rb', ':admin_user', ':user, :admin'
-      replace_in_file 'spec/abilities/admins_spec.rb', '@user = build_stubbed(:user, :admin)', '@admin = build_stubbed(:user, :admin)'
-      replace_in_file 'spec/abilities/admins_spec.rb', 'subject { Ability.new(@user) }', 'subject { Ability.new(@admin) }'
-
-      generate "migration add_roles_mask_to_users roles_mask:integer"
+      generate 'migration add_roles_mask_to_users roles_mask:integer'
       template '../templates/custom_cancan_matchers.rb', 'spec/support/matchers/custom_cancan.rb'
     end
 
@@ -422,6 +413,10 @@ module Suspenders
       end
 
       template "../templates/rails_helper.rb.erb", "spec/rails_helper.rb", force: true
+    end
+
+    def add_rubocop_config
+      template '../templates/rubocop.yml', '.rubocop.yml', force: true
     end
 
     # Do this last
