@@ -12,6 +12,9 @@ RSpec/FilePath:
   Exclude:
     - spec/abilities/*_spec.rb
 
+RSpec/LeadingSubject:
+  Enabled: false
+
 Rails:
  Enabled: true
 
