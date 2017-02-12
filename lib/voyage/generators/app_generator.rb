@@ -36,11 +36,15 @@ module Suspenders
       invoke :generate_test_environment
       invoke :update_test_environment
       invoke :add_rubocop_config
+      invoke :add_auto_annotate_models_rake_task
 
 
       # Do these last
       invoke :rake_db_setup
       invoke :configure_rvm_prepend_bin_to_path
+      invoke :run_rubocop_auto_correct
+      invoke :copy_env_to_example
+      invoke :add_to_gitignore
       invoke :actually_setup_spring
       invoke :bon_voyage
       super
@@ -98,6 +102,10 @@ module Suspenders
       build :add_rubocop_config
     end
 
+    def add_auto_annotate_models_rake_task
+      build :add_auto_annotate_models_rake_task
+    end
+
     def rake_db_setup
       build :rake_db_setup
     end
@@ -108,6 +116,18 @@ module Suspenders
 
     def setup_spring
       # do nothing so we can run generators after suspenders_customization runs
+    end
+
+    def run_rubocop_auto_correct
+      build :run_rubocop_auto_correct
+    end
+
+    def copy_env_to_example
+      build :copy_env_to_example
+    end
+
+    def add_to_gitignore
+      build :add_to_gitignore
     end
 
     def actually_setup_spring

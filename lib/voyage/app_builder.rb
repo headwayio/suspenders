@@ -126,6 +126,7 @@ module Suspenders
         add_sign_in_and_sign_out_routes_for_devise
         customize_user_factory(adding_first_and_last_name)
         generate_seeder_templates(using_devise: true)
+        customize_user_spec
       else
         generate_seeder_templates(using_devise: false)
       end
@@ -152,12 +153,13 @@ module Suspenders
     end
 
     def customize_application_controller_for_devise(adding_first_and_last_name)
-      inject_into_file 'app/controllers/application_controller.rb', after: "  protect_from_forgery with: :exception" do <<-RUBY.gsub(/^ {6}/, '').gsub(/^ {8}\n/, '')
-        \n
+      inject_into_file 'app/controllers/application_controller.rb', after: "  protect_from_forgery with: :exception" do <<-RUBY.gsub(/^ {6}/, '')
+
         before_action :configure_permitted_parameters, if: :devise_controller?
 
         protected
 
+        # rubocop:disable Metrics/MethodLength
         def configure_permitted_parameters
           devise_parameter_sanitizer.permit(
             :sign_up,
@@ -168,14 +170,14 @@ module Suspenders
               :password,
               :password_confirmation,
               :remember_me,
-            ]
+            ],
           )
 
           devise_parameter_sanitizer.permit(
             :sign_in,
             keys: [
               :login, :email, :password, :remember_me
-            ]
+            ],
           )
 
           devise_parameter_sanitizer.permit(
@@ -187,15 +189,17 @@ module Suspenders
               :password,
               :password_confirmation,
               :current_password,
-            ]
+            ],
           )
         end
+        # rubocop:enable Metrics/MethodLength
         RUBY
       end
     end
 
     def customize_resource_controller_for_devise(adding_first_and_last_name)
-      bundle_command "exec rails generate controller users"
+      bundle_command 'exec rails generate controller users'
+      run 'rm spec/controllers/users_controller_spec.rb'
 
       inject_into_class "app/controllers/users_controller.rb", "UsersController" do <<-RUBY.gsub(/^ {6}/, '')
         # https://github.com/CanCanCommunity/cancancan/wiki/authorizing-controller-actions
@@ -231,7 +235,7 @@ module Suspenders
 
     def add_canard_roles_to_devise_resource
       inject_into_file 'app/models/user.rb', before: /^end/ do <<-RUBY.gsub(/^ {6}/, '')
-        \n
+
         # Permissions cascade/inherit through the roles listed below. The order of
         # this list is important, it should progress from least to most privelage
         ROLES = [:admin].freeze
@@ -292,6 +296,24 @@ module Suspenders
       config = { force: true, using_devise: using_devise }
       template '../templates/seeder.rb.erb', 'lib/seeder.rb', config
       template '../templates/seeds.rb.erb', 'db/seeds.rb', config
+    end
+
+    def customize_user_spec
+      find = <<-RUBY.gsub(/^ {6}/, '')
+        pending "add some examples to (or delete) \#{__FILE__}"
+      RUBY
+
+      replace = <<-RUBY.gsub(/^ {6}/, '')
+        describe 'constants' do
+          context 'roles' do
+            it 'has the admin role' do
+              expect(User::ROLES).to eq([:admin])
+            end
+          end
+        end
+      RUBY
+
+      replace_in_file 'spec/models/user_spec.rb', find, replace
     end
 
     def customize_application_js
@@ -362,6 +384,20 @@ module Suspenders
         run "erb2slim '../app/views/refills' '../app/views/refills'"
         run "erb2slim -d '../app/views/refills'"
       end
+
+      find = <<-RUBY.gsub(/^ {2}/, '')
+        |  <div class="flash-
+        = key
+        | ">
+        = value
+      RUBY
+
+      replace = <<-RUBY.gsub(/^ {2}/, '')
+        div class="flash-\#{key}"
+          = value
+      RUBY
+
+      replace_in_file 'app/views/application/_flashes.html.slim', find, replace
     end
 
     def add_refills_to_layout
@@ -419,6 +455,10 @@ module Suspenders
       template '../templates/rubocop.yml', '.rubocop.yml', force: true
     end
 
+    def add_auto_annotate_models_rake_task
+      template '../templates/auto_annotate_models.rake', 'lib/tasks/auto_annotate_models.rake', force: true
+    end
+
     # Do this last
     def rake_db_setup
       rake 'db:migrate'
@@ -440,6 +480,24 @@ module Suspenders
       run 'chmod +x $rvm_path/hooks/after_cd_bundler'
 
       run 'mkdir -p .git/safe'
+    end
+
+    def run_rubocop_auto_correct
+      run 'rubocop --auto-correct'
+    end
+
+    def copy_env_to_example
+      run 'cp .env .env.example'
+    end
+
+    def add_to_gitignore
+      inject_into_file '.gitignore', after: '/tmp/*' do <<-RUBY.gsub(/^ {8}/, '')
+
+        .env
+        .zenflow-log
+        errors.err
+        RUBY
+      end
     end
 
     ###############################

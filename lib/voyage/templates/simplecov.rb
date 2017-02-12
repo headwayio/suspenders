@@ -1,4 +1,4 @@
-if ENV['COVERAGE'] =~ /\Atrue\z/i
+if ENV['COVERAGE'].match?(/\Atrue\z/i)
   require 'cadre/simplecov'
 
   SimpleCov.start do
@@ -23,7 +23,7 @@ if ENV['COVERAGE'] =~ /\Atrue\z/i
 
   SimpleCov.formatters = [
     SimpleCov::Formatter::HTMLFormatter,
-    Cadre::SimpleCov::VimFormatter
+    Cadre::SimpleCov::VimFormatter,
   ]
 
   SimpleCov.minimum_coverage 95
