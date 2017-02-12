@@ -359,6 +359,8 @@ module Suspenders
     # --------
     def downgrade_neat_1_8_so_refills_media_mixin_works
       replace_in_file 'Gemfile', "gem 'neat', '~> 2.0.0.beta.1'", "gem 'neat', '~> 1.8.0'"
+      run 'gem uninstall -x neat -v2.0.0.beta.2'
+      run 'bundle'
     end
     # ------------
     # END TEMP FIX
