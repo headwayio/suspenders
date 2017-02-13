@@ -7,22 +7,27 @@ with the necessary dependencies to run and test this app:
 
     % ./bin/setup
 
-It assumes you have a machine equipped with Ruby, Postgres, etc. If not, set up
-your machine with [this script].
+It assumes you have a machine equipped with Ruby, Postgres, etc.
 
-[this script]: https://github.com/thoughtbot/laptop
+## Seeded Data
 
-After setting up, you can run the application using [Heroku Local]:
+Assuming that devise was opted in to, a user and admin have been seeded for you:
 
-    % heroku local
+    admin@example.com -> asdfjkl123
+    user_1@example.com -> asdfjkl123
 
-[Heroku Local]: https://devcenter.heroku.com/articles/heroku-local
+## Static Pages
 
-## Guidelines
+The HighVoltage gem is used.
 
-Use the following guides for getting things done, programming well, and
-programming in style.
+## Authorization
 
-* [Protocol](http://github.com/thoughtbot/guides/blob/master/protocol)
-* [Best Practices](http://github.com/thoughtbot/guides/blob/master/best-practices)
-* [Style](http://github.com/thoughtbot/guides/blob/master/style)
+This repo uses CanCanCan and Canard to authorize user action. `ApplicationController` defines the `check_authorization` method for non-devise non-high voltage controllers. If you want to skip authorization for a specific method in a controller, the following method can be used: `skip_authorization_check`
+
+## Rubocop
+
+Take a look at the `.rubocop.yml` file to see what styles are being enforced.
+
+## Annotations
+
+Model & spec files are automatically annotated each time `rake db:migrate` is run.
