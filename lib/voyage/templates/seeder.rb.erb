@@ -18,8 +18,10 @@ module Seeder
     # Remove all users
     User.destroy_all
 
+    create(:user)
+
     # list user traits from factory_girl here
-    %w(admin another_role).each do |name|
+    %w(admin).each do |name|
       create(:user, name.to_sym)
     end
   end

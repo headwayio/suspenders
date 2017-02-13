@@ -14,7 +14,7 @@ puts
 
 dev_tables_to_seed =
   %w(
-    <%= config[:using_devise] ? 'admin_user' : 'factory_name' %>
+    <%= config[:using_devise] ? 'all_users' : 'factory_name' %>
   )
 
 production_tables_to_seed =

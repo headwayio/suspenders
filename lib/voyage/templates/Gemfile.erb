@@ -13,7 +13,8 @@ gem "normalize-rails", "~> 3.0.0"
 gem "pg"
 gem "puma"
 gem "rack-canonical-host"
-gem "rails", "<%= Voyage::RAILS_VERSION %>"
+# gem "rails", "<%= Voyage::RAILS_VERSION %>"
+gem 'rails', git: 'https://github.com/rails/rails.git', branch: '5-0-stable' # OMG Fix deprecation warnings...
 gem "recipient_interceptor"
 gem "sass-rails", "~> 5.0"
 gem "simple_form"
@@ -39,12 +40,14 @@ gem 'turbolinks'
 gem 'canard', git: 'https://github.com/jondkinney/canard.git', branch: 'feature/fixed-generators-and-rails-5' # ties into cancancan, adds roles for the user
 gem 'cancancan' # authorization library
 gem 'devise'
+gem 'pretender' # impersonate users as an admin
 
 # Database Tweaks
 gem 'dynamic_form' # for custom messages without the database column
 gem 'friendly_id' # slugs in the url auto-generated
 gem 'nested_form_fields' # Dynamically add and remove nested has_many association fields in a Ruby on Rails form
-gem 'nondestructive_migrations' # data migrations go here, not in regular ActiveRecord migrations
+# gem 'nondestructive_migrations' # data migrations go here, not in regular ActiveRecord migrations
+gem 'nondestructive_migrations', git: 'https://github.com/mfazekas/nondestructive_migrations.git', branch: 'fix-orm-warning'
 gem 'paper_trail' # version active record models and soft-delete by default
 gem 'settingslogic' # yaml settings (project wide, non-editable), this is implemented with the model Settings.rb
 
@@ -120,4 +123,8 @@ end
 
 group :staging, :production do
   gem "rack-timeout"
+end
+
+group :production do
+  gem 'analytics-ruby', '~> 2.2.2', require: 'segment/analytics'
 end

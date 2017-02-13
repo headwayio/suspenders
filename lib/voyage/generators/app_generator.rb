@@ -33,6 +33,7 @@ module Suspenders
       invoke :add_high_voltage_static_pages
       invoke :downgrade_neat_1_8_so_refills_media_mixin_works # this should be temporary until they get refills re-written to take advantage of Neat 2.0
       invoke :generate_refills
+      invoke :overwrite_application_layout
       invoke :generate_test_environment
       invoke :update_test_environment
       invoke :add_rubocop_config
@@ -88,6 +89,10 @@ module Suspenders
 
     def generate_refills
       build :generate_refills
+    end
+
+    def overwrite_application_layout
+      build :overwrite_application_layout
     end
 
     def generate_test_environment
