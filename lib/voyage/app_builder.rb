@@ -754,6 +754,11 @@ module Suspenders
       end
     end
 
+    def spin_up_webpacker
+      rake 'webpacker:install'
+      rake 'webpacker:install:react'
+    end
+
     ###############################
     # OVERRIDE SUSPENDERS METHODS #
     ###############################
