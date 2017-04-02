@@ -21,28 +21,17 @@
     <%%= Gon::Base.render_data %>
   </head>
   <body class="<%%= devise_controller? ? 'devise' : 'application' %> <%%= body_class %>">
-    <%%# Add gon here for turbolinks benefit %>
-    <%%= Gon::Base.render_data %>
-    <%%= render 'flashes' -%>
-    <%% if devise_controller? %>
+    <div class='outer-wrapper'>
+      <%%# Add gon here for turbolinks benefit %>
+      <%%= Gon::Base.render_data %>
+      <%%= render 'flashes' -%>
       <% if config[:add_refills] %><%%= render 'refills/navigation' %><% end %>
-      <div class='main-content'>
+      <div class='main'>
         <%%= yield %>
       </div>
-    <%% else %>
-      <div class='grid-offset'>
-        <div class='work-area'>
-          <% if config[:add_refills] %><%%= render 'refills/navigation' %><% end %>
-
-          <div class='main-content'>
-            <%%= yield %>
-          </div>
-        </div>
-      </div>
-    <%% end %>
-
-    <% if config[:add_refills] %><%%= render 'refills/footer' %><% end %>
-    <%%= render 'javascript' %>
-    <%%= render 'css_overrides' %>
+      <% if config[:add_refills] %><%%= render 'refills/footer' %><% end %>
+      <%%= render 'javascript' %>
+      <%%= render 'css_overrides' %>
+    </div>
   </body>
 </html>

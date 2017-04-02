@@ -598,14 +598,39 @@ module Suspenders
 
     def add_app_css_file
       create_file "app/assets/stylesheets/#{app_name}.sass" do <<-RUBY.gsub(/^ {8}/, '')
-        .main-content
+        .outer-wrapper
+          position: relative
+          min-height: 100%
+
+        .navigation-wrapper
+          @include outer-container
+
+        .main
           padding: 18px
+          @include outer-container
+          padding-bottom: 450px
+
+        .footer
+          min-height: 420px
+          position: absolute
+          bottom: 0
+          left: 0
         RUBY
       end
     end
 
     def update_flashes_css_file
       replace_in_file 'app/assets/stylesheets/refills/_flashes.scss', "margin-bottom: $base-spacing / 2;", "// margin-bottom: $base-spacing / 2;"
+    end
+
+    def update_application_css_file
+      inject_into_file 'app/assets/stylesheets/application.scss', before: '@import "neat";'  do <<-RUBY.gsub(/^ {8}/, '')
+        $visual-grid: true;
+        $visual-grid-color: #9cf !default;
+        $visual-grid-index: front !default;
+        $visual-grid-opacity: 0.1 !default;
+        RUBY
+      end
     end
 
     def add_admin_links_to_navigation
@@ -724,6 +749,7 @@ module Suspenders
         .env
         .zenflow-log
         errors.err
+        .ctags
         RUBY
       end
     end

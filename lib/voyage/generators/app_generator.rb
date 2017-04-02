@@ -35,6 +35,7 @@ module Suspenders
       invoke :generate_refills
       invoke :add_app_css_file
       invoke :update_flashes_css_file
+      invoke :update_application_css_file
       invoke :overwrite_application_layout
       invoke :generate_test_environment
       invoke :update_test_environment
@@ -101,6 +102,10 @@ module Suspenders
 
     def update_flashes_css_file
       build :update_flashes_css_file
+    end
+
+    def update_application_css_file
+      build :update_application_css_file
     end
 
     def overwrite_application_layout
