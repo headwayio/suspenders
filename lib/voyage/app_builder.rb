@@ -86,6 +86,11 @@ module Suspenders
     def install_devise
       if @@accept_defaults || agree?('Would you like to install Devise? (Y/n)')
         @@use_devise = true
+
+        if @@accept_defaults || agree?('Would you like to install Devise token authentication? (Y/n)')
+          devise_token_auth = true
+        end
+
         bundle_command 'exec rails generate devise:install'
 
         if @@accept_defaults || agree?("Would you like to add first_name and last_name to the devise model? (Y/n)")
@@ -112,7 +117,7 @@ module Suspenders
         end
 
         customize_devise_views if adding_first_and_last_name
-        customize_application_controller_for_devise(adding_first_and_last_name)
+        customize_application_controller_for_devise(adding_first_and_last_name, devise_token_auth)
         add_devise_registrations_controller
         customize_resource_controller_for_devise(adding_first_and_last_name)
         add_admin_views_for_devise_resource(adding_first_and_last_name)
@@ -124,6 +129,7 @@ module Suspenders
         customize_user_factory(adding_first_and_last_name)
         generate_seeder_templates(using_devise: true)
         customize_user_spec
+        add_token_auth
       else
         generate_seeder_templates(using_devise: false)
       end
@@ -149,7 +155,7 @@ module Suspenders
       end
     end
 
-    def customize_application_controller_for_devise(adding_first_and_last_name)
+    def customize_application_controller_for_devise(adding_first_and_last_name, devise_token_auth)
       inject_into_file 'app/controllers/application_controller.rb', before: "class ApplicationController < ActionController::Base" do <<-RUBY.gsub(/^ {8}/, '')
         # rubocop:disable Metrics/ClassLength, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/LineLength
         RUBY
@@ -159,6 +165,7 @@ module Suspenders
 
         check_authorization unless: :devise_or_pages_controller?
         impersonates :user
+        #{'acts_as_token_authentication_handler_for User' if devise_token_auth}
 
         before_action :configure_permitted_parameters, if: :devise_controller?
         before_action :authenticate_user!, unless: -> { is_a?(HighVoltage::PagesController) }
@@ -316,6 +323,7 @@ module Suspenders
       end
 
       template '../templates/admin_users_controller.rb', 'app/controllers/admin/users_controller.rb'
+      template '../templates/admin_controller.rb', 'app/controllers/admin/admin_controller.rb'
     end
 
     def authorize_devise_resource_for_index_action
@@ -508,9 +516,43 @@ module Suspenders
             expect(user.tester?).to eq(false)
           end
         end
+
+        context 'new user creation' do
+          it 'ensures uniqueness of the uuid' do
+            allow(User).to receive(:exists?).and_return(true, false)
+
+            expect do
+              create(:user)
+            end.to change { User.count }.by(1)
+
+            expect(User).to have_received(:exists?).exactly(2).times
+          end
+        end
       RUBY
 
       replace_in_file 'spec/models/user_spec.rb', find, replace
+    end
+
+    def add_token_auth
+      inject_into_file 'app/models/user.rb', after: "class User < ApplicationRecord" do <<-'RUBY'.gsub(/^ {6}/, '')
+
+        acts_as_token_authenticatable
+        RUBY
+      end
+
+      generate 'migration add_authentication_token_to_users "authentication_token:string{30}:uniq"'
+
+      # specs
+      template '../templates/specs/features/user_impersonation_spec.rb', 'spec/features/user_impersonation_spec.rb', force: true
+      template '../templates/specs/features/user_list_spec.rb', 'spec/features/user_list_spec.rb', force: true
+      template '../templates/specs/features/user_signup_spec.rb', 'spec/features/user_signup_spec.rb', force: true
+      template '../templates/specs/requests/user_api_spec.rb', 'spec/requests/user_api_spec.rb', force: true
+      template '../templates/specs/support/api/schemas/user.json', 'spec/support/api/schemas/user.json', force: true
+      template '../templates/config_initializers_ams.rb', 'config/initializers/ams.rb', force: true
+      template '../templates/specs/support/matchers/api_schema_matcher.rb', 'spec/support/matchers/api_schema_matcher.rb', force: true
+      template '../templates/specs/mailers/application_mailer_spec.rb.erb', 'spec/mailers/application_mailer_spec.rb', force: true
+      template '../templates/specs/support/features/session_helpers.rb', 'spec/support/features/session_helpers.rb', force: true
+      template '../templates/specs/support/request_spec_helper.rb', 'spec/support/request_spec_helper.rb', force: true
     end
 
     def customize_application_js
@@ -712,6 +754,20 @@ module Suspenders
       template '../templates/favicon.ico', 'app/assets/images/favicon.ico', force: true
     end
 
+    def customize_application_mailer
+      template '../templates/application_mailer.rb.erb', 'app/mailers/application_mailer.rb', force: true
+    end
+
+    def add_specs
+      inject_into_file 'app/jobs/application_job.rb', before: "class ApplicationJob < ActiveJob::Base" do <<-RUBY.gsub(/^ {8}/, '')
+        # :nocov:
+        RUBY
+      end
+
+      template '../templates/specs/controllers/admin/users_controller_spec.rb', 'spec/controllers/admin/users_controller_spec.rb', force: true
+      template '../templates/specs/controllers/application_controller_spec.rb', 'spec/controllers/application_controller_spec.rb', force: true
+    end
+
     # Do this last
     def rake_db_setup
       rake 'db:migrate'
@@ -750,6 +806,7 @@ module Suspenders
         .zenflow-log
         errors.err
         .ctags
+        .cadre/coverage.vim
         RUBY
       end
     end

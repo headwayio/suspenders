@@ -37,8 +37,9 @@ RSpec.configure do |config|
 
   config.use_transactional_fixtures = false
 
-  config.include Devise::TestHelpers, type: :controller
-  config.include ControllerHelpers, type: :controller
+  config.include Devise::Test::ControllerHelpers, type: :controller
+  config.include RequestSpecHelper, type: :request
+  config.include Features::SessionHelpers, type: :feature
   # config.include Paperclip::Shoulda::Matchers
 
   Capybara.javascript_driver = :poltergeist

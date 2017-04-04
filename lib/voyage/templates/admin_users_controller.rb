@@ -1,10 +1,12 @@
 module Admin
-  class UsersController < ApplicationController
-    before_action :require_admin!, except: [:stop_impersonating]
-    skip_authorization_check
+  class UsersController < AdminController
+    skip_before_action :require_admin!, only: [:stop_impersonating]
+    respond_to :html, :json
 
     def index
       @users = User.all
+
+      respond_with(@users)
     end
 
     def impersonate
@@ -21,11 +23,6 @@ module Admin
     end
 
     private
-
-    def require_admin!
-      txt = 'You must be an admin to perform that action'
-      redirect_to root_path, notice: txt unless current_user.admin?
-    end
 
     def track_impersonation(user, status)
       analytics_track(

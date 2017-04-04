@@ -43,6 +43,8 @@ module Suspenders
       invoke :add_auto_annotate_models_rake_task
       invoke :update_delayed_job_migration_rails_5_1_specify_4_2
       invoke :add_favicon
+      invoke :customize_application_mailer
+      invoke :add_specs
 
 
       # Do these last
@@ -135,6 +137,14 @@ module Suspenders
 
     def add_favicon
       build :add_favicon
+    end
+
+    def customize_application_mailer
+      build :customize_application_mailer
+    end
+
+    def add_specs
+      build :add_specs
     end
 
     def spin_up_webpacker

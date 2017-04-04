@@ -1,4 +1,4 @@
-if ENV['COVERAGE'].match?(/\Atrue\z/i)
+if ENV['COVERAGE'] && ENV['COVERAGE'].match?(/\Atrue\z/i)
   require 'cadre/simplecov'
 
   SimpleCov.start do
@@ -9,6 +9,7 @@ if ENV['COVERAGE'].match?(/\Atrue\z/i)
     add_group 'Helpers',     'app/helpers'
     add_group 'Mailers',     'app/mailers'
     add_group 'Models',      'app/models'
+    add_group 'Abilities',   'app/abilities'
     add_group 'Serializers', 'app/serializers'
     add_group 'Services',    'app/services'
     add_group 'Workers',     'app/workers'
@@ -19,6 +20,10 @@ if ENV['COVERAGE'].match?(/\Atrue\z/i)
     add_group 'Ignored Code' do |src_file|
       File.readlines(src_file.filename).grep(/:nocov:/).any?
     end
+
+    add_filter 'app/channels'
+    add_filter 'lib/tasks'
+    add_filter 'lib/seeder'
   end
 
   SimpleCov.formatters = [

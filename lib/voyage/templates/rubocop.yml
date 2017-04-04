@@ -15,6 +15,19 @@ RSpec/FilePath:
 RSpec/LeadingSubject:
   Enabled: false
 
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+
+RSpec/NestedGroups:
+  Max: 6
+
+RSpec/MultipleExpectations:
+  Max: 2
+
+RSpec/ExampleLength:
+  Max: 15
+
 Rails:
  Enabled: true
 
@@ -39,6 +52,7 @@ AllCops:
     - 'config/initializers/wrap_parameters.rb'
     - 'bin/**/*'
     - 'Rakefile'
+    - 'node_modules/**/*'
   Include:
     - 'Gemfile'
     - '.simplecov'

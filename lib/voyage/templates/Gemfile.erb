@@ -41,8 +41,10 @@ gem 'canard', git: 'https://github.com/jondkinney/canard.git', branch: 'feature/
 gem 'cancancan' # authorization library
 gem 'devise'
 gem 'pretender' # impersonate users as an admin
+gem 'simple_token_authentication', '~> 1.0' # adds token authentication to Devise
 
 # Database Tweaks
+gem 'active_model_serializers', '~> 0.10.0'
 gem 'dynamic_form' # for custom messages without the database column
 gem 'friendly_id' # slugs in the url auto-generated
 gem 'nested_form_fields' # Dynamically add and remove nested has_many association fields in a Ruby on Rails form
@@ -80,7 +82,6 @@ group :development do
   gem 'fix-db-schema-conflicts' # when working with multiple developers schema order of columns is standardized.
   gem 'meta_request' # for chrome rails console plugin found here: https://chrome.google.com/webstore/detail/railspanel/gjpfobpafnhjhbajcjgccbbdofdckggg?hl=en-US
   gem 'rails-erd' # auto gen ERD Diagram of models in the app on rake db:migrate
-  gem 'redcarpet' # used to render the readme inside a static welcome page from the high_voltage gem
   gem 'zenflow', git: 'https://github.com/zencoder/zenflow.git'
 end
 
@@ -89,16 +90,16 @@ group :development, :test do
   gem "bullet"
   gem "bundler-audit", ">= 0.5.0", require: false
   gem "dotenv-rails"
-  gem "factory_girl_rails"
+  <%# gem "factory_girl_rails" %>
   <%# gem "pry-byebug" %>
   <%# gem "pry-rails" %>
   gem "rspec-rails", "~> 3.5"
 
   # Customizations
-  gem 'faker' # provides auto generated names for factories, can be customized
   gem 'letter_opener' # auto-open emails when they're sent
   gem 'rubocop'
   gem 'rubocop-rspec', require: false
+  gem 'redcarpet' # used to render the readme inside a static welcome page from the high_voltage gem
 end
 
 group :development, :staging do
@@ -118,8 +119,15 @@ group :test do
   # Customizations
   gem 'cadre' # highlights code coverage in vim
   gem 'capybara' # DSL for finding elements on a page during integration testing
+  gem 'json-schema' # Allows testing API responses against JSON schema
   gem 'poltergeist' # Headless browser, used in integration tests
+  gem 'rspec_junit_formatter' # Creates JUnit style XML for use in CircleCI
   gem 'selenium-webdriver' # `brew install chromedriver`, used for acceptance tests in an actual browser.
+end
+
+group :development, :test, :staging do
+  gem 'factory_girl_rails'
+  gem 'faker' # provides auto generated names for factories, can be customized
 end
 
 group :staging, :production do
