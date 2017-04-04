@@ -48,6 +48,7 @@ module Suspenders
 
 
       # Do these last
+      invoke :add_api_foundation
       invoke :rake_db_setup
       invoke :configure_rvm_prepend_bin_to_path
       invoke :run_rubocop_auto_correct
@@ -149,6 +150,10 @@ module Suspenders
 
     def spin_up_webpacker
       build :spin_up_webpacker
+    end
+
+    def add_api_foundation
+      build :add_api_foundation
     end
 
     def rake_db_setup
