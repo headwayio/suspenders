@@ -555,6 +555,26 @@ module Suspenders
       template '../templates/specs/support/request_spec_helper.rb', 'spec/support/request_spec_helper.rb', force: true
     end
 
+    def add_api_foundation
+      # Create /app/api/base_api_controller.rb
+      template '../templates/api_base_controller.rb', 'app/controllers/api/base_api_controller.rb', force: true
+
+      # Create /app/api/v1/users_controller.rb
+      template '../templates/api_users_controller.rb', 'app/controllers/api/v1/users_controller.rb', force: true
+
+      # Update routes to include namespaced API
+      inject_into_file 'config/routes.rb', before: /^end/ do <<-RUBY.gsub(/^ {6}/, '')
+
+        # API-specific routes
+        namespace 'api' do
+          namespace 'v1' do
+            resources :users, except: [:new, :edit]
+          end
+        end
+        RUBY
+      end
+    end
+
     def customize_application_js
       template '../templates/application.js', 'app/assets/javascripts/application.js', force: true
 
