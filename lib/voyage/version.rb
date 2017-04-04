@@ -5,5 +5,5 @@ module Voyage
       .read("#{File.dirname(__FILE__)}/../../.ruby-version")
       .strip
       .freeze
-  VERSION = '1.44.0.9'.freeze
+  VERSION = '1.44.0.10'.freeze
 end
