@@ -82,3 +82,9 @@ Metrics/MethodLength:
 
 Metrics/AbcSize:
   Enabled: false
+
+Style/SymbolArray:
+  Enabled: false
+
+Style/AndOr:
+  Enabled: false
