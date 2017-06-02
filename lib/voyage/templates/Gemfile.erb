@@ -11,7 +11,7 @@ gem "honeybadger"
 gem "jquery-rails"
 gem "normalize-rails", "~> 3.0.0"
 gem "pg"
-gem "puma"
+<%# gem "puma" %>
 gem "rack-canonical-host"
 gem "rails", "<%= Voyage::RAILS_VERSION %>"
 gem "recipient_interceptor"
@@ -133,4 +133,5 @@ end
 
 group :production do
   gem 'analytics-ruby', '~> 2.2.2', require: 'segment/analytics'
+  gem 'puma'
 end
