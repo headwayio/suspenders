@@ -766,11 +766,6 @@ module Suspenders
       template '../templates/auto_annotate_models.rake', 'lib/tasks/auto_annotate_models.rake', force: true
     end
 
-    def update_delayed_job_migration_rails_5_1_specify_4_2
-      file = Dir['db/migrate/*_create_delayed_jobs.rb'].first
-      replace_in_file file, 'class CreateDelayedJobs < ActiveRecord::Migration', "class CreateDelayedJobs < ActiveRecord::Migration[4.2]"
-    end
-
     def add_favicon
       template '../templates/favicon.ico', 'app/assets/images/favicon.ico', force: true
     end
@@ -887,9 +882,11 @@ module Suspenders
     end
 
     def configure_background_jobs_for_rspec
-      # template '../templates/config_dj_rails5_patches.rb', 'config/dj_rails5_patches.rb', force: true
+      # NOTE: (2017-05-31) jon => don't want this
+    end
 
-      run 'rails g delayed_job:active_record'
+    def configure_active_job
+      # NOTE: (2017-06-02) jon => don't want this
     end
 
     def configure_capybara_webkit

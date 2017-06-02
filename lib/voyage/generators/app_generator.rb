@@ -41,7 +41,6 @@ module Suspenders
       invoke :update_test_environment
       invoke :add_rubocop_config
       invoke :add_auto_annotate_models_rake_task
-      invoke :update_delayed_job_migration_rails_5_1_specify_4_2
       invoke :add_favicon
       invoke :customize_application_mailer
       invoke :add_specs
@@ -130,10 +129,6 @@ module Suspenders
 
     def add_auto_annotate_models_rake_task
       build :add_auto_annotate_models_rake_task
-    end
-
-    def update_delayed_job_migration_rails_5_1_specify_4_2
-      build :update_delayed_job_migration_rails_5_1_specify_4_2
     end
 
     def add_favicon
