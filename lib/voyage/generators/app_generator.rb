@@ -24,6 +24,7 @@ module Suspenders
     def finish_template
       invoke :suspenders_customization
       invoke :update_gemset_in_gemfile
+      invoke :bundle_without_production
       invoke :use_slim
       invoke :install_devise
       invoke :customize_application_js
@@ -61,6 +62,10 @@ module Suspenders
 
     def update_gemset_in_gemfile
       build :update_gemset_in_gemfile
+    end
+
+    def bundle_without_production
+      build :bundle_without_production
     end
 
     def use_slim

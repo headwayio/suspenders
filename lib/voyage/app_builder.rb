@@ -22,6 +22,10 @@ module Suspenders
       gsub_file('Gemfile', /^\s{2}\n/, '')
     end
 
+    def bundle_without_production
+      template '../templates/bundle_config', '.bundle/config'
+    end
+
     def use_slim
       if @@accept_defaults || agree?('Would you like to use slim? (Y/n)')
         @@use_slim = true
