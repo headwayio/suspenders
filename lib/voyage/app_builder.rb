@@ -931,5 +931,10 @@ RUBY
     def remove_config_comment_lines
       # NOTE: (2016-02-09) jonk => don't want this
     end
+
+    def add_cucumber
+      bundle_command 'exec rails generate cucumber:install'
+      template "../templates/config_cucumber.yml", "config/cucumber.yml", force: true
+    end
   end
 end

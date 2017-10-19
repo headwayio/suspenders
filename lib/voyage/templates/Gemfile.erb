@@ -105,6 +105,9 @@ group :development, :test do
   <%# gem "pry-rails" %>
   gem "rspec-rails", "~> 3.5"
 
+  gem 'cucumber-rails', require: false
+  gem 'spring-commands-cucumber'
+
   # Customizations
   gem 'letter_opener' # auto-open emails when they're sent
   gem 'rubocop'

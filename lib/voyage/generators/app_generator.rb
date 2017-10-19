@@ -43,6 +43,7 @@ module Suspenders
       invoke :add_favicon
       invoke :customize_application_mailer
       invoke :add_specs
+      invoke :add_cucumber
 
 
       # Do these last
@@ -140,6 +141,10 @@ module Suspenders
 
     def add_specs
       build :add_specs
+    end
+
+    def add_cucumber
+      build :add_cucumber
     end
 
     def spin_up_webpacker
