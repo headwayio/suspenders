@@ -876,6 +876,7 @@ RUBY
           g.request_specs false
           g.routing_specs false
           g.stylesheets false
+          g.serializer false
           g.test_framework :rspec
           g.view_specs false
           g.fixture_replacement :factory_girl, dir: 'spec/factories'
