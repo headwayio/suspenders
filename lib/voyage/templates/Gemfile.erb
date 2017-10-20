@@ -49,7 +49,7 @@ gem 'simple_token_authentication', '~> 1.0' # adds token authentication to Devis
 # Administrative panel
 gem 'administrate', git: 'https://github.com/thoughtbot/administrate.git'
 gem 'administrate-field-boolean_to_yes_no'
-gem 'administrate-field-carrierwave'
+gem 'administrate-field-shrine'
 gem 'administrate-field-collection_select'
 gem 'administrate-field-enum', git: 'https://github.com/headwayio/administrate-field-enum.git'
 gem 'administrate-field-hex_color_picker'
@@ -67,9 +67,10 @@ gem 'paper_trail' # version active record models and soft-delete by default
 gem 'settingslogic' # yaml settings (project wide, non-editable), this is implemented with the model Settings.rb
 
 # User Uploads
-gem 'carrierwave'
-gem 'fog-aws'
+gem 'shrine'
+gem 'image_processing'
 gem 'mini_magick'
+gem "aws-sdk-s3", "~> 1.2" # for Amazon S3 storage
 
 # Cron Jobs
 # gem 'whenever', require: false # provides a clear syntax for writing and deploying cron jobs
