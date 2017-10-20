@@ -2,8 +2,8 @@
 
 require 'uri'
 require 'cgi'
-require_relative '../support/paths'
-require_relative '../support/selectors'
+require_relative '../../support/paths'
+require_relative '../../support/selectors'
 
 module WithinHelpers
   def with_scope(locator)
