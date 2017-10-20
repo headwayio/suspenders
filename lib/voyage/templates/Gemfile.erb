@@ -121,10 +121,16 @@ end
 
 group :test do
   <%# gem "capybara-webkit" # We don't want this. %>
+  gem "chronic"
   gem "database_cleaner"
+  gem "email_spec"
   gem "formulaic"
   gem "launchy"
+  gem "pickle"
+  gem "pickler", git: "https://github.com/headwayio/pickler", branch: "feature/support_comments_after_linebreak" # , path: '/rails/headway/pickler'"
   gem "shoulda-matchers"
+  gem "show_me_the_cookies"
+  gem "site_prism"
   gem "simplecov", require: false
   gem "timecop"
   gem "webmock"

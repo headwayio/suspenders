@@ -936,6 +936,15 @@ RUBY
     def add_cucumber
       bundle_command 'exec rails generate cucumber:install'
       template "../templates/config_cucumber.yml", "config/cucumber.yml", force: true
+
+      %w{ auth_steps cookies_steps date_time_steps debug_steps email_steps pickle_steps web_steps }.each do |file_name|
+        template "../templates/cucumber/features/helper_steps/#{file_name}.rb", "features/helper_steps/#{file_name}.rb", force: true
+      end
+
+      %w{ cookies email env_local hooks pickle selectors cuke_steps env factory_girl paths pickle_dry_run }.each do |file_name|
+        template "../templates/cucumber/features/support/#{file_name}.rb", "features/support/#{file_name}.rb", force: true
+      end
+
     end
   end
 end
