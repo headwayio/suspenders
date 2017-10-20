@@ -180,8 +180,7 @@ module Suspenders
         before_action :detect_device_type
 
         rescue_from CanCan::AccessDenied do |exception|
-          Rails.logger.error "\n\n***\n" \
-            "Access denied on #{exception.action} #{exception.subject.inspect}"
+          Rails.logger.error "Access denied on \#{exception.action} \#{exception.subject.inspect}"
 
           redirect_to '/unauthorized', alert: exception.message
         end
@@ -607,40 +606,28 @@ module Suspenders
       # Setup admin/users_controller
       template '../templates/admin_users_controller.rb', 'app/controllers/admin/users_controller.rb', force: true
 
-      inject_into_file 'app/dashboards/user_dashboard.rb', after: 'ATTRIBUTE_TYPES = {' do <<-RUBY.gsub(/^ {8}/, '')
-
-        id: Field::Number,
-        email: Field::String,
-        roles_mask: Field::Number,
+      inject_into_file 'app/dashboards/user_dashboard.rb', after: 'ATTRIBUTE_TYPES = {' do <<-RUBY.gsub(/^ {8}/, '    ')
         roles: RolesField,
         password: Field::String,
         password_confirmation: Field::String,
 RUBY
       end
 
-      inject_into_file 'app/dashboards/user_dashboard.rb', after: 'COLLECTION_ATTRIBUTES = [' do <<-RUBY.gsub(/^ {8}/, '')
-
-        :id,
-        :email,
-        :roles
+      inject_into_file 'app/dashboards/user_dashboard.rb', after: 'COLLECTION_ATTRIBUTES = [' do <<-RUBY.gsub(/^ {8}/, '    ')
+        :roles,
 RUBY
       end
 
       # By default, Thor ignores a further insertion of identical content, hence the force flag here
-      inject_into_file 'app/dashboards/user_dashboard.rb', after: 'SHOW_PAGE_ATTRIBUTES = [', force: true do <<-RUBY.gsub(/^ {8}/, '')
-
-        :id,
-        :email,
+      inject_into_file 'app/dashboards/user_dashboard.rb', after: 'SHOW_PAGE_ATTRIBUTES = [', force: true do <<-RUBY.gsub(/^ {8}/, '    ')
         :roles,
 RUBY
       end
 
-      inject_into_file 'app/dashboards/user_dashboard.rb', after: 'FORM_ATTRIBUTES = [' do <<-RUBY.gsub(/^ {8}/, '')
-
-        :email,
+      inject_into_file 'app/dashboards/user_dashboard.rb', after: 'FORM_ATTRIBUTES = [' do <<-RUBY.gsub(/^ {8}/, '    ')
         :roles,
         :password,
-        :password_confirmation
+        :password_confirmation,
 RUBY
       end
 
