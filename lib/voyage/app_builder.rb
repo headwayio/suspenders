@@ -600,6 +600,7 @@ module Suspenders
 
       copy_file '../templates/views/admin/users/_collection.html.erb', 'app/views/admin/users/_collection.html.erb', force: true
       copy_file '../templates/views/admin/users/index.html.erb', 'app/views/admin/users/index.html.erb', force: true
+      copy_file '../templates/views/admin/users/_password_fields.html.slim', 'app/views/admin/users/index.html.slim', force: true
     end
 
     def setup_user_dashboard
