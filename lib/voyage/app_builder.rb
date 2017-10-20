@@ -180,8 +180,12 @@ module Suspenders
         before_action :detect_device_type
 
         rescue_from CanCan::AccessDenied do |exception|
-          redirect_to root_path, alert: exception.message
+          Rails.logger.error "\n\n***\n" \
+            "Access denied on #{exception.action} #{exception.subject.inspect}"
+
+          redirect_to '/unauthorized', alert: exception.message
         end
+
 
         # Example Traditional Event: analytics_track(user, 'Created Widget', { widget_name: 'foo' })
         # Example Page View:         analytics_track(user, 'Page Viewed', { page_name: 'Terms and Conditions', url: '/terms' })
@@ -696,6 +700,7 @@ RUBY
     def add_high_voltage_static_pages
       template '../templates/about.html.erb', "app/views/pages/about.html.#{@@use_slim ? 'slim' : 'erb'}"
       template '../templates/welcome.html.erb', "app/views/pages/welcome.html.erb"
+      template '../templates/unauthorized.html.erb', "app/views/pages/unauthorized.html.#{@@use_slim ? 'slim' : 'erb'}"
 
       inject_into_file 'config/routes.rb', before: /^end/ do <<-RUBY.gsub(/^ {6}/, '')
         root 'high_voltage/pages#show', id: 'welcome'
