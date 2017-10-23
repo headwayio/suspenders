@@ -51,6 +51,7 @@ module Suspenders
       invoke :rake_db_setup
       invoke :add_administrate
       invoke :add_shrine
+      invoke :add_paranoia_to_user
       invoke :configure_rvm_prepend_bin_to_path
       invoke :configure_sidekiq
       invoke :configure_letter_opener
@@ -162,6 +163,10 @@ module Suspenders
 
     def add_shrine
       build :add_shrine
+    end
+
+    def add_paranoia_to_user
+      build :add_paranoia_to_user
     end
 
     def rake_db_setup

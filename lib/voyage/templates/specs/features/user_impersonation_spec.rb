@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-feature 'Impersonate user' do
+feature 'Impersonate user', type: :feature do
   given(:admin_user) { create(:user, :admin) }
   given(:regular_user) { create(:user) }
 
