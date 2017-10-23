@@ -80,7 +80,7 @@ module Suspenders
     end
 
     def update_application_rb_for_slim
-      inject_into_file "config/application.rb", after: "     g.fixture_replacement :factory_girl, dir: 'spec/factories'\n" do <<-'RUBY'.gsub(/^ {2}/, '')
+      inject_into_file "config/application.rb", after: "     g.fixture_replacement :factory_bot, dir: 'spec/factories'\n" do <<-'RUBY'.gsub(/^ {2}/, '')
         g.template_engine :slim
         RUBY
       end
@@ -789,11 +789,11 @@ RUBY
     end
 
     def update_test_environment
-      inject_into_file 'spec/support/factory_girl.rb', before: /^end/ do <<-RUBY.gsub(/^ {6}/, '')
+      inject_into_file 'spec/support/factory_bot.rb', before: /^end/ do <<-RUBY.gsub(/^ {6}/, '')
 
-        # Spring doesn't reload factory_girl
+        # Spring doesn't reload factory_bot
         config.before(:all) do
-          FactoryGirl.reload
+          FactoryBot.reload
         end
         RUBY
       end
@@ -919,7 +919,7 @@ RUBY
           g.serializer false
           g.test_framework :rspec
           g.view_specs false
-          g.fixture_replacement :factory_girl, dir: 'spec/factories'
+          g.fixture_replacement :factory_bot, dir: 'spec/factories'
         end
 
       RUBY
@@ -981,7 +981,7 @@ RUBY
         template "../templates/cucumber/features/helper_steps/#{file_name}.rb", "features/step_definitions/helper_steps/#{file_name}.rb", force: true
       end
 
-      %w{ cookies email env_local hooks pickle selectors cuke_steps env factory_girl paths pickle_dry_run }.each do |file_name|
+      %w{ cookies email env_local hooks pickle selectors cuke_steps env factory_bot paths pickle_dry_run }.each do |file_name|
         template "../templates/cucumber/features/support/#{file_name}.rb", "features/support/#{file_name}.rb", force: true
       end
 
