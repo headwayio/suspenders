@@ -314,8 +314,27 @@ module Suspenders
           # view file has JS that will identify the anonymous user through segment
           # after registration via "after devise registration path"
         end
+
+        def edit_password
+          @user = User.find(current_user.id)
+        end
+
+        def update_password
+          @user = User.find(current_user.id)
+          if @user.update_with_password(user_params)
+            # Sign in the user by passing validation in case their password changed
+            bypass_sign_in(@user) unless true_user && true_user != @user
+            flash[:notice] = 'Password successfully updated.'
+            redirect_to root_path
+          else
+            # flash.now[:error] = 'Password not updated'
+            render 'edit_password'
+          end
+        end
         RUBY
+
       end
+      template '../templates/edit_password.html.slim', 'app/views/users/edit_password.html.slim'
     end
 
     def add_admin_views_for_devise_resource(adding_first_and_last_name)
@@ -600,6 +619,30 @@ module Suspenders
       copy_file '../templates/views/admin/users/_collection.html.erb', 'app/views/admin/users/_collection.html.erb', force: true
       copy_file '../templates/views/admin/users/index.html.erb', 'app/views/admin/users/index.html.erb', force: true
       copy_file '../templates/views/admin/users/_password_fields.html.slim', 'app/views/admin/users/index.html.slim', force: true
+
+      generate 'administrate:views:edit'
+
+      replace_in_file 'app/views/admin/application/_form.html.erb', 'form_for', "simple_form_for"
+
+      inject_into_file 'config/initializers/simple_form.rb', after: 'SimpleForm.setup do |config|' do <<-RUBY
+
+        SimpleForm::FormBuilder.map_type :inet, to: SimpleForm::Inputs::StringInput
+
+      RUBY
+      end
+    end
+
+    def add_shrine
+      template '../templates/config_initializers_shrine.rb', 'config/initializers/shrine.rb', force: true
+      template '../templates/photo_uploader.rb', 'app/uploaders/photo_uploader.rb', force: true
+
+      generate 'migration add_photo_to_users photo_data:string'
+
+      inject_into_file 'app/models/user.rb', after: 'class User < ApplicationRecord' do <<-RUBY
+
+      include ::PhotoUploader::Attachment.new(:photo) # adds an `photo` virtual attribute
+        RUBY
+      end
     end
 
     def setup_user_dashboard
@@ -610,17 +653,20 @@ module Suspenders
         roles: RolesField,
         password: Field::String,
         password_confirmation: Field::String,
+        photo: Field::Shrine,
 RUBY
       end
 
       inject_into_file 'app/dashboards/user_dashboard.rb', after: 'COLLECTION_ATTRIBUTES = [' do <<-RUBY.gsub(/^ {8}/, '    ')
         :roles,
+        :photo,
 RUBY
       end
 
       # By default, Thor ignores a further insertion of identical content, hence the force flag here
       inject_into_file 'app/dashboards/user_dashboard.rb', after: 'SHOW_PAGE_ATTRIBUTES = [', force: true do <<-RUBY.gsub(/^ {8}/, '    ')
         :roles,
+        :photo,
 RUBY
       end
 
@@ -628,6 +674,7 @@ RUBY
         :roles,
         :password,
         :password_confirmation,
+        :photo,
 RUBY
       end
 
