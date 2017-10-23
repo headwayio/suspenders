@@ -7,11 +7,11 @@ puts 'Seeding the database...'
 puts
 
 <% if config[:using_devise] %>
-  User.admins.destroy_all
-  User.create(
-    email: 'admin@example.com',
-    roles: [:admin],
-    password: 'asdfjkl123',
-    password_confirmation: 'asdfjkl123',
-  )
+User.admins.destroy_all
+User.create(
+  email: 'admin@example.com',
+  roles: [:admin],
+  password: 'asdfjkl123',
+  password_confirmation: 'asdfjkl123',
+)
 <% end %>
