@@ -1,9 +1,9 @@
 require 'faker'
-require 'factory_girl_rails'
+require 'factory_bot_rails'
 
 # ensure Spring has the latest version of the factories
-FactoryGirl.reload
+FactoryBot.reload
 
 # Allow factories to be created with just create(:user) instead of
-# FactoryGirl.create(:user)
-World(FactoryGirl::Syntax::Methods)
+# FactoryBot.create(:user)
+World(FactoryBot::Syntax::Methods)
