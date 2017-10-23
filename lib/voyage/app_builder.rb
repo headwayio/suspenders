@@ -482,10 +482,11 @@ module Suspenders
         password 'asdfjkl123'
         password_confirmation 'asdfjkl123'
         sequence(:email) { |n| "user_#{n}@example.com" }
+        email { "user_#{uuid}@example.com" }
 
         trait :admin do
           roles [:admin]
-          email 'admin@example.com'
+          email { "admin_#{uuid}@example.com" }
         end
         RUBY
       end
@@ -789,7 +790,11 @@ RUBY
     end
 
     def update_test_environment
-      inject_into_file 'spec/support/factory_bot.rb', before: /^end/ do <<-RUBY.gsub(/^ {6}/, '')
+      gsub_file 'spec/support/factory_girl.rb',
+        'config.include FactoryGirl::Syntax::Methods',
+        'config.include FactoryBot::Syntax::Methods'
+
+      inject_into_file 'spec/support/factory_girl.rb', before: /^end/ do <<-RUBY.gsub(/^ {6}/, '')
 
         # Spring doesn't reload factory_bot
         config.before(:all) do

@@ -7,14 +7,14 @@ if Rails.env.development? || Rails.env.test?
       include FactoryBot::Syntax::Methods
 
       <% if config[:using_devise] %>
-        User.destroy_all
+      User.destroy_all
 
-        create(:user, :admin)
-        create(:user)
+      create(:user, :admin)
+      create(:user)
       <% else %>
-        Resource.destroy_all
+      Resource.destroy_all
 
-        create(:resource)
+      create(:resource)
       <% end %>
     end
   end
