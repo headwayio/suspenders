@@ -20,11 +20,8 @@ module AnalyticsTrack
       user_id: user.uuid,
       event: event_name,
       properties: {
-        browser: (browser.name rescue 'unknown'),
-        browser_id: (browser.id rescue 'unknown'),
-        browser_version: (browser.version rescue 'unknown'),
-        platform: (browser.platform rescue 'unknown'),
-        roles: (user.roles.map(&:to_s).join(',') rescue ''),
+        **browser_attributes,
+        roles: roles_for_user(user),
         rails_env: Rails.env.to_s,
       }.merge(sanitized_options),
     }
@@ -37,6 +34,30 @@ module AnalyticsTrack
   end
 
   private
+
+  def browser_attributes
+    if browser.present?
+      {
+        browser: browser&.name,
+        browser_id: browser&.id,
+        browser_version: browser&.version,
+        platform: browser&.platform,
+      }
+    else
+      {
+        browser: 'unknown',
+        browser_id: 'unknown',
+        browser_version: 'unknown',
+        platform: 'unknown'
+      }
+    end
+  end
+
+  def roles_for_user(user)
+    user.roles.map(&:to_s).join(',')
+  rescue
+    ''
+  end
 
   def sanitize_hash_javascript(hash)
     hash.deep_stringify_keys
