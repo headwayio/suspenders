@@ -504,7 +504,7 @@ module Suspenders
 
     def generate_seeder_templates(using_devise:)
       config = { force: true, using_devise: using_devise }
-      template '../templates/seeder.rb.erb', 'lib/seeder.rb', config
+      template '../templates/lib/tasks/dev.rake.erb', 'lib/tasks/dev.rake', config
       template '../templates/seeds.rb.erb', 'db/seeds.rb', config
     end
 
