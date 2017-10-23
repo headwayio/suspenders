@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-feature 'Retrieve user list from browser' do
+feature 'Retrieve user list from browser', type: :feature do
   scenario 'without admin privileges' do
     user = create(:user)
 

@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-feature 'User signup' do
+feature 'User signup', type: :feature do
   scenario 'Valid user information' do
     sign_up_with('First', 'Last', 'test@example.com', 'password', 'password')
     expect(page).to have_content('Welcome! You have signed up successfully.')

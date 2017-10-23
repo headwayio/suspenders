@@ -481,7 +481,6 @@ module Suspenders
       inject_into_file 'spec/factories/users.rb', before: /^  end/ do <<-'RUBY'.gsub(/^ {4}/, '')
         password 'asdfjkl123'
         password_confirmation 'asdfjkl123'
-        sequence(:email) { |n| "user_#{n}@example.com" }
         email { "user_#{uuid}@example.com" }
 
         trait :admin do
@@ -642,6 +641,16 @@ module Suspenders
       inject_into_file 'app/models/user.rb', after: 'class User < ApplicationRecord' do <<-RUBY
 
       include ::PhotoUploader::Attachment.new(:photo) # adds an `photo` virtual attribute
+        RUBY
+      end
+    end
+
+    def add_paranoia_to_user
+      generate 'migration add_deleted_at_to_users deleted_at:datetime:index'
+
+      inject_into_file 'app/models/user.rb', after: 'class User < ApplicationRecord' do <<-RUBY
+
+      acts_as_paranoid
         RUBY
       end
     end
