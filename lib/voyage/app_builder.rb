@@ -157,9 +157,11 @@ module Suspenders
         ''
 
       inject_into_file 'app/views/devise/registrations/edit.html.erb',
-        after: '.form-inputs' do <<-RUBY.gsub(/^ {8}/, '')
+        after: '<div class="form-inputs">' do <<-RUBY.gsub(/^ {8}/, '')
 
-        <%= image_tag @user.photo.url, style: 'max-width: 120px; max-height: 120px;' %>
+        <% if @user.photo.present? %>
+          <%= image_tag @user.photo.url, style: 'max-width: 120px; max-height: 120px;' %>
+        <% end %>
         <%= f.input :photo, as: :hidden, input_html: {value: @user.cached_photo_data} %>
         <%= f.input :photo, as: :file %>
       RUBY
