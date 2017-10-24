@@ -18,9 +18,11 @@ module Suspenders
     end
 
     def slimify_all_the_things
-      inside('lib') do # arbitrary, run in context of newly generated app
-        run "erb2slim '../app/views/' '../app/views/'"
-        run "erb2slim -d '../app/views/'"
+      if @@use_slim
+        inside('lib') do # arbitrary, run in context of newly generated app
+          #run "erb2slim '../app/views/' '../app/views/'"
+          #run "erb2slim -d '../app/views/'"
+        end
       end
     end
 
