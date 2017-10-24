@@ -35,7 +35,7 @@ RSpec.describe ApplicationController, type: :controller do
       expect(Analytics).to have_received(:track)
     end
 
-    it 'trys to pull roles on a non-user object' do
+    it 'tries to pull roles on a non-user object' do
       allow(user).to receive(:roles).and_return(StandardError.new('bazinga'))
       controller.analytics_track(user, 'Signed In', page_name: 'Page')
       expect(Analytics).to have_received(:track)

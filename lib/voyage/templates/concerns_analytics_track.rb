@@ -29,13 +29,13 @@ module AnalyticsTrack
     # rubocop:enable Metrics/CyclomaticComplexity
 
     Analytics.track(segment_attributes)
-    logger.debug('Analytics tracking info: ' + segment_attributes)
+    logger.debug('Analytics tracking info: ' + segment_attributes.to_s)
   end
 
   private
 
   def browser_attributes
-    if browser.present?
+    if (defined?(browser)).present?
       {
         browser: browser&.name,
         browser_id: browser&.id,

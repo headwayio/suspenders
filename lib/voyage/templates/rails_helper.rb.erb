@@ -62,13 +62,13 @@ RSpec.configure do |config|
     # Sidekiq::Testing.inline! if spec.metadata[:inline]
   end
 
-  config.before(:suite) do
-    # Load seed data to bootstrap the app with things the real app will have at
-    # launch like States, roles, etc.
-    require 'rake'
-    <%= "#{app_name.camelize}::Application.load_tasks" %>
-    Rake::Task['db:seed'].invoke
-  end
+# config.before(:suite) do
+#   # Load seed data to bootstrap the app with things the real app will have at
+#   # launch like States, roles, etc.
+#   require 'rake'
+#   <%= "#{app_name.camelize}::Application.load_tasks" %>
+#   Rake::Task['db:seed'].invoke
+# end
 
   config.after(:each) do
     if Rails.env.test? || Rails.env.cucumber?
