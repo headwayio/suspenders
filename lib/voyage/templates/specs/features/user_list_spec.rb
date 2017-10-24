@@ -16,6 +16,6 @@ feature 'Retrieve user list from browser', type: :feature do
     sign_in(user.email, user.password)
     visit admin_users_path
 
-    expect(page).to have_content(user.email)
+    expect(page).to have_content(user.id)
   end
 end
