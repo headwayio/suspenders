@@ -155,6 +155,15 @@ module Suspenders
       gsub_file 'app/views/devise/registrations/edit.html.erb',
         '<%= f.input :current_password, hint: "we need your current password to confirm your changes", required: true %>',
         ''
+
+      inject_into_file 'app/views/devise/registrations/edit.html.erb',
+        after: '.form-inputs' do <<-RUBY.gsub(/^ {8}/, '')
+
+        <%= image_tag @user.photo.url, style: 'max-width: 120px; max-height: 120px;' %>
+        <%= f.input :photo, as: :hidden, input_html: {value: @user.cached_photo_data} %>
+        <%= f.input :photo, as: :file %>
+      RUBY
+      end
     end
 
     def customize_devise_views
@@ -214,6 +223,7 @@ module Suspenders
               #{':first_name,' if adding_first_and_last_name}
               #{':last_name,' if adding_first_and_last_name}
               :email,
+              :photo,
               :password,
               :password_confirmation,
               :remember_me,
@@ -233,6 +243,7 @@ module Suspenders
               #{':first_name,' if adding_first_and_last_name}
               #{':last_name,' if adding_first_and_last_name}
               :email,
+              :photo,
               :password,
               :password_confirmation,
               :current_password,
@@ -311,14 +322,14 @@ module Suspenders
             # flash.now[:error] = 'Password not updated'
             render 'edit_password'
           end
+        end
 
-          private
+        private
 
-          def user_params
-            params.require(:user).permit(:password,
-                                        :password_confirmation,
-                                        :current_password)
-          end
+        def user_params
+          params.require(:user).permit(:password,
+                                      :password_confirmation,
+                                      :current_password)
         end
         RUBY
 
