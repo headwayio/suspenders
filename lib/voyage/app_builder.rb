@@ -17,6 +17,13 @@ module Suspenders
       end
     end
 
+    def slimify_all_the_things
+      inside('lib') do # arbitrary, run in context of newly generated app
+        run "erb2slim '../app/views/' '../app/views/'"
+        run "erb2slim -d '../app/views/'"
+      end
+    end
+
     def update_gemset_in_gemfile
       replace_in_file 'Gemfile', '#ruby-gemset', "#ruby-gemset=#{app_name}"
 
