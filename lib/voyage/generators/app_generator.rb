@@ -61,15 +61,10 @@ module Suspenders
       invoke :add_to_gitignore
       invoke :spin_up_webpacker
       invoke :actually_setup_spring
-      invoke :slimify_all_the_things
       invoke :bon_voyage
       super
     end
 
-    def slimify_all_the_things
-      build :slimify_all_the_things
-    end
-    
     def update_gemset_in_gemfile
       build :update_gemset_in_gemfile
     end
