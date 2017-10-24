@@ -621,7 +621,6 @@ module Suspenders
       copy_file '../templates/views/admin/users/_password_fields.html.slim', 'app/views/admin/users/index.html.slim', force: true
 
       generate 'administrate:views:edit'
-      generate 'administrate:views:edit User'
 
       replace_in_file 'app/views/admin/application/_form.html.erb', 'form_for', "simple_form_for"
 
@@ -675,7 +674,12 @@ module Suspenders
 
     def setup_user_dashboard
       # Setup admin/users_controller
+
+      generate 'administrate:views:edit User'
+
       template '../templates/admin_users_controller.rb', 'app/controllers/admin/users_controller.rb', force: true
+
+      copy_file '../templates/views/admin/users/_role_edit.html.erb', 'app/views/admin/users/_role_edit.html.erb', force: true
 
       inject_into_file 'app/dashboards/user_dashboard.rb', after: 'ATTRIBUTE_TYPES = {' do <<-RUBY.gsub(/^ {8}/, '    ')
         roles: RolesField,
@@ -711,7 +715,17 @@ RUBY
         root to: 'users#index'
         RUBY
       end
+      replace_in_file 'app/views/admin/users/_form.html.erb', 'form_for', "simple_form_for"
+
+      inject_into_file 'app/views/admin/users/_form.html.erb', before: '<div class="form-actions">' do <<-RUBY.gsub(/^ {4}/, '')
+
+        <%= render 'admin/users/role_edit', { f: f, user: page.resource, roles: User::ROLES } %>
+
+        RUBY
+      end
     end
+
+
 
     def setup_roles_field
       template '../templates/fields/roles_field.rb', 'app/fields/roles_field.rb', force: true
