@@ -320,6 +320,14 @@ module Suspenders
             # flash.now[:error] = 'Password not updated'
             render 'edit_password'
           end
+
+          private
+
+          def user_params
+            params.require(:user).permit(:password,
+                                        :password_confirmation,
+                                        :current_password)
+          end
         end
         RUBY
 
@@ -443,7 +451,7 @@ module Suspenders
           end
           collection do
             get 'edit_password'
-            post 'update_password'
+            patch 'update_password'
           end
         end
 
