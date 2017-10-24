@@ -114,6 +114,7 @@ module Suspenders
 
         bundle_command "exec rails generate devise user"
         bundle_command 'exec rails generate devise:views'
+        remove_password_fields_from_views
 
         if @@use_slim
           inside('lib') do # arbitrary, run in context of newly generated app
@@ -140,6 +141,20 @@ module Suspenders
         @@use_devise = false
         generate_seeder_templates(using_devise: false)
       end
+    end
+
+    def remove_password_fields_from_views
+      gsub_file 'app/views/devise/registrations/edit.html.erb',
+        '<%= f.input :password, autocomplete: "off", hint: "leave it blank if you don\'t want to change it", required: false %>',
+        ''
+
+      gsub_file 'app/views/devise/registrations/edit.html.erb',
+        '<%= f.input :password_confirmation, required: false %>',
+        ''
+
+      gsub_file 'app/views/devise/registrations/edit.html.erb',
+        '<%= f.input :current_password, hint: "we need your current password to confirm your changes", required: true %>',
+        ''
     end
 
     def customize_devise_views
@@ -272,7 +287,9 @@ module Suspenders
       inject_into_class 'app/controllers/users_controller.rb', 'UsersController' do <<-RUBY.gsub(/^ {6}/, '')
         # https://github.com/CanCanCommunity/cancancan/wiki/authorizing-controller-actions
         # load_and_authorize_resource only: []
-        skip_authorization_check only: [:analytics_alias]
+        skip_authorization_check only: [:analytics_alias,
+                                        :edit_password,
+                                        :update_password]
 
         def analytics_alias
           # view file has JS that will identify the anonymous user through segment
@@ -371,6 +388,8 @@ module Suspenders
         validates :password_confirmation,
                   presence: true,
                   on: :create
+        PASSWORD_FORMAT_MESSAGE = 'Password must be between ' \
+                                  '8 and 72 characters'.freeze
 
         def tester?
           (email =~ /(example.com|headway.io)$/).present?
@@ -412,6 +431,10 @@ module Suspenders
         resources :users do
           member do
             get 'analytics_alias'
+          end
+          collection do
+            get 'edit_password'
+            post 'update_password'
           end
         end
 
