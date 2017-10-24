@@ -621,6 +621,7 @@ module Suspenders
       copy_file '../templates/views/admin/users/_password_fields.html.slim', 'app/views/admin/users/index.html.slim', force: true
 
       generate 'administrate:views:edit'
+      generate 'administrate:views:edit User'
 
       replace_in_file 'app/views/admin/application/_form.html.erb', 'form_for', "simple_form_for"
 
@@ -635,12 +636,29 @@ module Suspenders
     def add_shrine
       template '../templates/config_initializers_shrine.rb', 'config/initializers/shrine.rb', force: true
       template '../templates/photo_uploader.rb', 'app/uploaders/photo_uploader.rb', force: true
+      template '../templates/attachment_uploader.rb', 'app/uploaders/attachment_uploader.rb', force: true
+
+      bundle_command "exec rails generate model image attachable:references{polymorphic} image_data:text"
+      bundle_command "exec rails generate model attachment attachable:references{polymorphic} attachment_data:text"
+
 
       generate 'migration add_photo_to_users photo_data:string'
 
       inject_into_file 'app/models/user.rb', after: 'class User < ApplicationRecord' do <<-RUBY
 
       include ::PhotoUploader::Attachment.new(:photo) # adds an `photo` virtual attribute
+        RUBY
+      end
+
+      inject_into_file 'app/models/image.rb', after: 'class Image < ApplicationRecord', force: true do <<-RUBY
+
+      include ::PhotoUploader::Attachment.new(:image) # adds an `image` virtual attribute
+        RUBY
+      end
+
+      inject_into_file 'app/models/attachment.rb', after: 'class Attachment < ApplicationRecord', force: true do <<-RUBY
+
+      include ::AttachmentUploader::Attachment.new(:attachment) # adds an `photo` virtual attribute
         RUBY
       end
     end
