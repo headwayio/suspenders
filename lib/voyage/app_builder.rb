@@ -616,6 +616,11 @@ module Suspenders
         end
         RUBY
       end
+
+      # Copy in API specs
+      template '../templates/specs/support/database_cleaner.rb', 'specs/support/database_cleaner.rb', force: true
+      template '../templates/specs/support/http_helpers.rb', 'specs/support/http_helpers.rb', force: true
+      template '../templates/specs/requests/user_api_spec.rb', 'specs/requests/user_api_spec.rb', force: true
     end
 
     def add_administrate
