@@ -3,6 +3,8 @@ AfterStep('@pause') do
   STDIN.getc
 end
 
+# rubocop:disable Lint/Debugger
 AfterStep('@pry') do
   require 'pry'; binding.pry
 end
+# rubocop:enable Lint/Debugger

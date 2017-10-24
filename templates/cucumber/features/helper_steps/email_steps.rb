@@ -1,4 +1,4 @@
-# rubycop:disable all
+# rubocop:disable all
 # Commonly used email steps
 #
 # To add your own steps make a custom_email_steps.rb

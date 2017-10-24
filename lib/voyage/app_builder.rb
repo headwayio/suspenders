@@ -170,6 +170,7 @@ module Suspenders
 
       inject_into_file 'app/controllers/application_controller.rb', after: "  protect_from_forgery with: :exception" do <<-RUBY.gsub(/^ {6}/, '')
 
+        include AnalyticsTrack
         check_authorization unless: :devise_or_pages_controller?
         impersonates :user
         #{'acts_as_token_authentication_handler_for User' if devise_token_auth}
@@ -185,47 +186,10 @@ module Suspenders
           redirect_to '/unauthorized', alert: exception.message
         end
 
-
-        # Example Traditional Event: analytics_track(user, 'Created Widget', { widget_name: 'foo' })
-        # Example Page View:         analytics_track(user, 'Page Viewed', { page_name: 'Terms and Conditions', url: '/terms' })
-        #
-        # NOTE: setup some defaults that we want to track on every event mixpanel_track
-        # NOTE: the identify step happens on every page load to keep intercom.io and mixpanel people up to date
-        def analytics_track(user, event_name, options = {})
-          return if user.tester?
-
-          sanitized_options = sanitize_hash_javascript(options)
-
-          segment_attributes = {
-            user_id: user.uuid,
-            event: event_name,
-            properties: {
-              browser:         "\#{browser.name rescue 'unknown'}",
-              browser_id:      "\#{browser.id rescue 'unknown'}",
-              browser_version: "\#{browser.version rescue 'unknown'}",
-              platform:        "\#{browser.platform rescue 'unknown'}",
-              roles:           "\#{user.roles.map(&:to_s).join(',') rescue ''}",
-              rails_env:       Rails.env.to_s,
-            }.merge(sanitized_options),
-          }
-
-          Analytics.track(segment_attributes)
-        end
-
         protected
 
         def devise_or_pages_controller?
           devise_controller? == true || is_a?(HighVoltage::PagesController)
-        end
-
-        def sanitize_hash_javascript(hash)
-          hash.deep_stringify_keys
-              .deep_transform_keys { |k| sanitize_javascript(k) }
-              .transform_values    { |v| sanitize_javascript(v) }
-        end
-
-        def sanitize_javascript(value)
-          value.is_a?(String) ? ActionView::Base.new.escape_javascript(value) : value
         end
 
         def configure_permitted_parameters
@@ -645,19 +609,22 @@ module Suspenders
 
       inject_into_file 'app/models/user.rb', after: 'class User < ApplicationRecord' do <<-RUBY
 
-      include ::PhotoUploader::Attachment.new(:photo) # adds an `photo` virtual attribute
+      # adds an `photo` virtual attribute
+      include ::PhotoUploader::Attachment.new(:photo)
         RUBY
       end
 
       inject_into_file 'app/models/image.rb', after: 'class Image < ApplicationRecord', force: true do <<-RUBY
 
-      include ::PhotoUploader::Attachment.new(:image) # adds an `image` virtual attribute
+      # adds an `image` virtual attribute
+      include ::PhotoUploader::Attachment.new(:image)
         RUBY
       end
 
       inject_into_file 'app/models/attachment.rb', after: 'class Attachment < ApplicationRecord', force: true do <<-RUBY
 
-      include ::AttachmentUploader::Attachment.new(:attachment) # adds an `photo` virtual attribute
+      # adds an `photo` virtual attribute
+      include ::AttachmentUploader::Attachment.new(:attachment)
         RUBY
       end
     end
