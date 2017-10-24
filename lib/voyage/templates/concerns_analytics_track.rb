@@ -28,8 +28,7 @@ module AnalyticsTrack
     # rubocop:enable Style/RescueModifier, Lint/RescueWithoutErrorClass
     # rubocop:enable Metrics/CyclomaticComplexity
 
-    # TODO: Replace with whatever analytics that Connor wants
-    # Analytics.track(segment_attributes)
+    Analytics.track(segment_attributes)
     logger.debug('Analytics tracking info: ' + segment_attributes)
   end
 
