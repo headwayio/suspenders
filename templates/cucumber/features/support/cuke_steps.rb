@@ -1,3 +1,4 @@
+# rubocop:disable all
 step_definition_dir = "#{File.expand_path('../../features', File.dirname(__FILE__))}/step_definitions"
 
 f = File.new("#{File.expand_path('../../public', File.dirname(__FILE__))}/cuke_steps.html", 'w')

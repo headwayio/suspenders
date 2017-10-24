@@ -55,7 +55,7 @@ module AnalyticsTrack
 
   def roles_for_user(user)
     user.roles.map(&:to_s).join(',')
-  rescue
+  rescue StandardError
     ''
   end
 
