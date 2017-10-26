@@ -124,19 +124,19 @@ module Suspenders
         end
 
         customize_devise_views if adding_first_and_last_name
-        customize_application_controller_for_devise(adding_first_and_last_name, devise_token_auth)
+        customize_application_controller_for_devise(adding_first_and_last_name)
         add_devise_registrations_controller
         customize_resource_controller_for_devise(adding_first_and_last_name)
         add_admin_views_for_devise_resource(adding_first_and_last_name)
         add_analytics_initializer
         authorize_devise_resource_for_index_action
         add_canard_roles_to_devise_resource
-        update_devise_initializer
+        update_devise_initializer(devise_token_auth)
         add_custom_routes_for_devise
         customize_user_factory(adding_first_and_last_name)
         generate_seeder_templates(using_devise: true)
         customize_user_spec
-        add_token_auth
+        add_token_auth if devise_token_auth
       else
         @@use_devise = false
         generate_seeder_templates(using_devise: false)
@@ -188,7 +188,7 @@ module Suspenders
       end
     end
 
-    def customize_application_controller_for_devise(adding_first_and_last_name, devise_token_auth)
+    def customize_application_controller_for_devise(adding_first_and_last_name)
       inject_into_file 'app/controllers/application_controller.rb', before: "class ApplicationController < ActionController::Base" do <<-RUBY.gsub(/^ {8}/, '')
         # rubocop:disable Metrics/ClassLength, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/LineLength
         RUBY
@@ -199,7 +199,6 @@ module Suspenders
         include AnalyticsTrack
         check_authorization unless: :devise_or_pages_controller?
         impersonates :user
-        #{'acts_as_token_authentication_handler_for User' if devise_token_auth}
 
         before_action :configure_permitted_parameters, if: :devise_controller?
         before_action :authenticate_user!, unless: -> { is_a?(HighVoltage::PagesController) }
@@ -409,8 +408,7 @@ module Suspenders
         validates :password_confirmation,
                   presence: true,
                   on: :create
-        PASSWORD_FORMAT_MESSAGE = 'Password must be between ' \
-                                  '8 and 72 characters'.freeze
+        PASSWORD_FORMAT_MESSAGE = 'Password must be between 8 and 72 characters'.freeze
 
         def tester?
           (email =~ /(example.com|headway.io)$/).present?
@@ -429,9 +427,15 @@ module Suspenders
       end
     end
 
-    def update_devise_initializer
+    def update_devise_initializer(devise_token_auth)
       replace_in_file 'config/initializers/devise.rb',
         'config.sign_out_via = :delete', 'config.sign_out_via = :get'
+
+      if devise_token_auth
+        replace_in_file 'config/initializers/devise.rb',
+          '# config.http_authenticatable = false',
+          'config.http_authenticatable = true',
+      end
 
       replace_in_file 'config/initializers/devise.rb',
         "config.mailer_sender = 'please-change-me-at-config-initializers-devise@example.com'",
@@ -447,6 +451,7 @@ module Suspenders
       replace = <<-RUBY.gsub(/^ {6}/, '')
         devise_for :users, controllers: {
           registrations: 'devise_customizations/registrations',
+          sessions: 'devise_customizations/sessions',
         }
 
         resources :users do
@@ -566,15 +571,20 @@ module Suspenders
       replace_in_file 'spec/models/user_spec.rb', find, replace
     end
 
-    # FIXME: (2017-06-04) jon => make this use tiddle
     def add_token_auth
-      inject_into_file 'app/models/user.rb', after: "class User < ApplicationRecord" do <<-'RUBY'.gsub(/^ {6}/, '')
+      generate 'model AuthenticationToken body:string user:references last_used_at:datetime ip_address:string user_agent:string'
 
-        acts_as_token_authenticatable
-        RUBY
+      gsub_file 'app/models/user.rb',
+        ':validatable',
+        ':validatable, :token_authenticatable'
+
+      inject_into_file 'app/models/user.rb', before: 'before_create :generate_uuid' do <<-RUBY.gsub(/^ {8}/, '')
+        has_many :authentication_tokens
+
+      RUBY
       end
 
-      generate 'migration add_authentication_token_to_users "authentication_token:string{30}:uniq"'
+      copy_file '../templates/devise_sessions_controller.rb', 'app/controllers/devise_customizations/sessions_controller.rb', force: true
 
       # specs
       template '../templates/specs/features/user_impersonation_spec.rb', 'spec/features/user_impersonation_spec.rb', force: true
