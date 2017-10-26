@@ -1,13 +1,15 @@
 module Api
   class BaseApiController < ApplicationController
+    include JSONAPI::Utils
+
     # Disable CSRF protection for API calls
-    protect_from_forgery with: :null_session
+    protect_from_forgery with: :null_session, prepend: true
 
     # Disable cookie usage
     before_action :destroy_session
 
     # Handle objects that aren't found
-    rescue_from ActiveRecord::RecordNotFound, with: :not_found
+    rescue_from ActiveRecord::RecordNotFound, with: :jsonapi_render_not_found
 
     def respond_with_errors(object)
       serialized_errors = object.errors.messages.map do |field, errors|
@@ -28,11 +30,6 @@ module Api
 
     def destroy_session
       request.session_options[:skip] = true
-    end
-
-    def not_found
-      render json: { errors: 'Not found' },
-             status: 404
     end
   end
 end
