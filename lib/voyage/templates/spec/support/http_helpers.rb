@@ -2,7 +2,7 @@ module HttpHelpers
   def authenticate(user)
     request = double(remote_ip: '127.0.0.1', user_agent: 'RSpec') # rubocop:disable RSpec/VerifiedDoubles, Metrics/LineLength
     @user = user
-    @authentication_token = user.authentication_token
+    @authentication_token = Tiddle.create_and_return_token(user, request)
   end
 
   def authed_get(endpoint, opts = {})

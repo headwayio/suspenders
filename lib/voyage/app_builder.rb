@@ -360,6 +360,12 @@ module Suspenders
         replace_in_file "spec/abilities/#{resource_name}_spec.rb", "require 'cancan/matchers'", "require_relative '../support/matchers/custom_cancan'"
       end
 
+      inject_into_file 'app/abilities/admins.rb', after: 'can [:destroy], User' do <<-RUBY.gsub(/^ {6}/, '')
+
+        can :manage, :all
+      RUBY
+      end
+
       find = <<-RUBY.gsub(/^ {4}/, '')
         it { is_expected.to be_able_to(:manage, user) }
       RUBY
@@ -434,7 +440,7 @@ module Suspenders
       if devise_token_auth
         replace_in_file 'config/initializers/devise.rb',
           '# config.http_authenticatable = false',
-          'config.http_authenticatable = true',
+          'config.http_authenticatable = true'
       end
 
       replace_in_file 'config/initializers/devise.rb',
@@ -585,18 +591,6 @@ module Suspenders
       end
 
       copy_file '../templates/devise_sessions_controller.rb', 'app/controllers/devise_customizations/sessions_controller.rb', force: true
-
-      # specs
-      template '../templates/specs/features/user_impersonation_spec.rb', 'spec/features/user_impersonation_spec.rb', force: true
-      template '../templates/specs/features/user_list_spec.rb', 'spec/features/user_list_spec.rb', force: true
-      template '../templates/specs/features/user_signup_spec.rb', 'spec/features/user_signup_spec.rb', force: true
-      template '../templates/specs/requests/user_api_spec.rb', 'spec/requests/user_api_spec.rb', force: true
-      template '../templates/specs/support/api/schemas/user.json', 'spec/support/api/schemas/user.json', force: true
-      template '../templates/config_initializers_ams.rb', 'config/initializers/ams.rb', force: true
-      template '../templates/specs/support/matchers/api_schema_matcher.rb', 'spec/support/matchers/api_schema_matcher.rb', force: true
-      template '../templates/specs/mailers/application_mailer_spec.rb.erb', 'spec/mailers/application_mailer_spec.rb', force: true
-      template '../templates/specs/support/features/session_helpers.rb', 'spec/support/features/session_helpers.rb', force: true
-      template '../templates/specs/support/request_spec_helper.rb', 'spec/support/request_spec_helper.rb', force: true
     end
 
     def add_api_foundation
@@ -605,6 +599,12 @@ module Suspenders
 
       # Create /app/api/v1/users_controller.rb
       template '../templates/api_users_controller.rb', 'app/controllers/api/v1/users_controller.rb', force: true
+
+      # Create user resource
+      copy_file '../templates/resources/api/v1/user_resource.rb', 'app/resources/api/v1/user_resource.rb', force: true
+
+      # Setup JSONAPI::Resources
+      copy_file '../templates/config_initializers_jsonapi_resources.rb', 'config/initializers/jsonapi_resources.rb', force: true
 
       # Update routes to include namespaced API
       inject_into_file 'config/routes.rb', before: /^end/ do <<-RUBY.gsub(/^ {6}/, '')
@@ -618,10 +618,22 @@ module Suspenders
         RUBY
       end
 
+      template '../templates/config_initializers_ams.rb', 'config/initializers/ams.rb', force: true
+
       # Copy in API specs
-      template '../templates/specs/support/database_cleaner.rb', 'spec/support/database_cleaner.rb', force: true
-      template '../templates/specs/support/http_helpers.rb', 'spec/support/http_helpers.rb', force: true
-      template '../templates/specs/requests/user_api_spec.rb', 'spec/requests/user_api_spec.rb', force: true
+      template '../templates/spec/support/database_cleaner.rb', 'spec/support/database_cleaner.rb', force: true
+      template '../templates/spec/support/http_helpers.rb', 'spec/support/http_helpers.rb', force: true
+      template '../templates/spec/requests/api/v1/users_controller_spec.rb', 'spec/requests/api/v1/users_controller_spec.rb', force: true
+      template '../templates/spec/features/user_impersonation_spec.rb', 'spec/features/user_impersonation_spec.rb', force: true
+      template '../templates/spec/features/user_list_spec.rb', 'spec/features/user_list_spec.rb', force: true
+      template '../templates/spec/features/user_signup_spec.rb', 'spec/features/user_signup_spec.rb', force: true
+      template '../templates/spec/support/api/schemas/user.json', 'spec/support/api/schemas/user.json', force: true
+
+      template '../templates/spec/support/matchers/api_schema_matcher.rb', 'spec/support/matchers/api_schema_matcher.rb', force: true
+      template '../templates/spec/support/matchers/json_api_matchers.rb', 'spec/support/matchers/json_api_matchers.rb', force: true
+      template '../templates/spec/mailers/application_mailer_spec.rb.erb', 'spec/mailers/application_mailer_spec.rb', force: true
+      template '../templates/spec/support/features/session_helpers.rb', 'spec/support/features/session_helpers.rb', force: true
+      template '../templates/spec/support/request_spec_helper.rb', 'spec/support/request_spec_helper.rb', force: true
     end
 
     def add_administrate
@@ -927,8 +939,8 @@ RUBY
         RUBY
       end
 
-      template '../templates/specs/controllers/admin/users_controller_spec.rb', 'spec/controllers/admin/users_controller_spec.rb', force: true
-      template '../templates/specs/controllers/application_controller_spec.rb', 'spec/controllers/application_controller_spec.rb', force: true
+      template '../templates/spec/controllers/admin/users_controller_spec.rb', 'spec/controllers/admin/users_controller_spec.rb', force: true
+      template '../templates/spec/controllers/application_controller_spec.rb', 'spec/controllers/application_controller_spec.rb', force: true
     end
 
     # Do this last

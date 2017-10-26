@@ -45,6 +45,9 @@ gem 'canard', git: 'https://github.com/jondkinney/canard.git', branch: 'feature/
 gem 'cancancan' # authorization library
 gem 'devise'
 gem 'pretender' # impersonate users as an admin
+
+# API / JSON
+gem 'jsonapi-utils'
 gem 'tiddle'
 
 # Administrative panel
@@ -111,6 +114,7 @@ group :development, :test do
   gem 'spring-commands-cucumber'
 
   # Customizations
+  gem 'airborne'
   gem 'letter_opener' # auto-open emails when they're sent
   gem 'rubocop'
   gem 'rubocop-rspec', require: false
