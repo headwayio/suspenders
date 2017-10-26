@@ -626,6 +626,7 @@ module Suspenders
       template '../templates/helpers/administrate_resources_helper.rb', 'app/helpers/administrate_resources_helper.rb', force: true
       template '../templates/helpers/admin/application_helper.rb', 'app/helpers/admin/application_helper.rb', force: true
 
+      setup_trix_drag_and_drop
       setup_user_dashboard
       setup_roles_field
 
@@ -640,6 +641,22 @@ module Suspenders
       inject_into_file 'config/initializers/simple_form.rb', after: 'SimpleForm.setup do |config|' do <<-RUBY
 
         SimpleForm::FormBuilder.map_type :inet, to: SimpleForm::Inputs::StringInput
+
+      RUBY
+      end
+    end
+
+    def setup_trix_drag_and_drop
+      # Copy controller for receiving image uploads via JSON/XHR
+      template '../templates/images_controller.rb', 'app/controllers/images_controller.rb', force: true
+
+      # Setup Javascript for Trix drag-and-drop uploads
+      generate 'administrate:assets:javascript'
+      copy_file '../templates/trix_attachments.js', 'app/assets/javascripts/administrate/components/trix_attachments.js', force: true
+
+      inject_into_file 'app/abilities/users.rb', after: 'Canard::Abilities.for(:user) do' do <<-RUBY
+
+        can[:create], Image
 
       RUBY
       end
@@ -670,6 +687,11 @@ module Suspenders
         RUBY
       end
 
+      # Remove association requirement for Trix uploading standalone Images
+      gsub_file 'app/models/image.rb',
+        'belongs_to :attachable, polymorphic: true',
+        'belongs_to :attachable, polymorphic: true, required: false',
+
       inject_into_file 'app/models/attachment.rb', after: 'class Attachment < ApplicationRecord', force: true do <<-RUBY
 
       # adds an `photo` virtual attribute
@@ -696,6 +718,11 @@ module Suspenders
       template '../templates/admin_users_controller.rb', 'app/controllers/admin/users_controller.rb', force: true
 
       copy_file '../templates/views/admin/users/_role_edit.html.erb', 'app/views/admin/users/_role_edit.html.erb', force: true
+
+      # Remove encrypted password field
+      gsub_file 'app/dashboards/user_dashboard.rb',
+        ':encrypted_password',
+        ''
 
       inject_into_file 'app/dashboards/user_dashboard.rb', after: 'ATTRIBUTE_TYPES = {' do <<-RUBY.gsub(/^ {8}/, '    ')
         roles: RolesField,
