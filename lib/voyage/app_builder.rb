@@ -654,10 +654,9 @@ module Suspenders
       generate 'administrate:assets:javascript'
       copy_file '../templates/trix_attachments.js', 'app/assets/javascripts/administrate/components/trix_attachments.js', force: true
 
-      inject_into_file 'app/abilities/users.rb', after: 'Canard::Abilities.for(:user) do' do <<-RUBY
+      inject_into_file 'app/abilities/users.rb', after: 'Canard::Abilities.for(:user) do' do <<-RUBY.gsub(/ {6}/, '')
 
-        can[:create], Image
-
+        can [:create], Image
       RUBY
       end
     end
@@ -690,7 +689,7 @@ module Suspenders
       # Remove association requirement for Trix uploading standalone Images
       gsub_file 'app/models/image.rb',
         'belongs_to :attachable, polymorphic: true',
-        'belongs_to :attachable, polymorphic: true, required: false',
+        'belongs_to :attachable, polymorphic: true, required: false'
 
       inject_into_file 'app/models/attachment.rb', after: 'class Attachment < ApplicationRecord', force: true do <<-RUBY
 
@@ -721,7 +720,7 @@ module Suspenders
 
       # Remove encrypted password field
       gsub_file 'app/dashboards/user_dashboard.rb',
-        ':encrypted_password',
+        ':encrypted_password,',
         ''
 
       inject_into_file 'app/dashboards/user_dashboard.rb', after: 'ATTRIBUTE_TYPES = {' do <<-RUBY.gsub(/^ {8}/, '    ')
