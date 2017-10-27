@@ -243,8 +243,8 @@ config.public_file_server.headers = {
     end
 
     def configure_spec_support_features
-      empty_directory_with_keep_file 'spec/features'
-      empty_directory_with_keep_file 'spec/support/features'
+      empty_directory_with_keep_file 'spec/system'
+      empty_directory_with_keep_file 'spec/support/system'
     end
 
     def configure_rspec
