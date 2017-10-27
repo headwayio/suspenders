@@ -654,10 +654,16 @@ module Suspenders
       generate 'administrate:assets:javascript'
       copy_file '../templates/trix_attachments.js', 'app/assets/javascripts/administrate/components/trix_attachments.js', force: true
 
-      inject_into_file 'app/abilities/users.rb', after: 'Canard::Abilities.for(:user) do' do <<-RUBY.gsub(/ {6}/, '')
+      inject_into_file 'app/abilities/users.rb', after: 'Canard::Abilities.for(:user) do' do <<-RUBY.gsub(/^ {6}/, '')
 
         can [:create], Image
       RUBY
+      end
+
+      inject_into_file 'config/routes.rb', before: 'resources :users do' do <<-RUBY.gsub(/^ {6}/, '')
+        resources :images, only: [:create]
+
+        RUBY
       end
     end
 
