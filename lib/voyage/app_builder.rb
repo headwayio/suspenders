@@ -682,10 +682,10 @@ module Suspenders
       RUBY
       end
 
-      inject_into_file 'config/routes.rb', before: 'resources :users do' do <<-RUBY.gsub(/^ {6}/, '')
-        resources :images, only: [:create]
+      inject_into_file 'config/routes.rb', before: 'namespace :admin do' do <<-RUBY
+resources :images, only: [:create]
 
-        RUBY
+    RUBY
       end
     end
 
