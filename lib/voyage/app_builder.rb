@@ -637,6 +637,7 @@ module Suspenders
       generate 'administrate:views:edit'
 
       replace_in_file 'app/views/admin/application/_form.html.erb', 'form_for', "simple_form_for"
+      copy_file '../templates/views/admin/application/_navigation.html.erb', 'app/views/admin/application/_navigation.html.erb', force: true
 
       inject_into_file 'config/initializers/simple_form.rb', after: 'SimpleForm.setup do |config|' do <<-RUBY
 
