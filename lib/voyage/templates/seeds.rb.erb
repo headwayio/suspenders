@@ -7,7 +7,7 @@ puts 'Seeding the database...'
 puts
 
 <% if config[:using_devise] %>
-User.destroy_all
+User.with_deleted.each(&:really_destroy!)
 User.create(
   email: 'admin@example.com',
   roles: [:admin],
