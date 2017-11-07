@@ -954,6 +954,7 @@ RUBY
         RUBY
       end
 
+      template '../templates/spec/support/shared_examples/admin_dashboard_spec.rb', 'spec/support/shared_examples/admin_dashboard_spec.rb', force: true
       template '../templates/spec/controllers/admin/users_controller_spec.rb', 'spec/controllers/admin/users_controller_spec.rb', force: true
       template '../templates/spec/controllers/application_controller_spec.rb', 'spec/controllers/application_controller_spec.rb', force: true
     end
