@@ -44,7 +44,6 @@ module Suspenders
       invoke :customize_application_mailer
       invoke :add_specs
       invoke :add_cucumber
-      invoke :add_address_model
 
 
       # Do these last
@@ -53,6 +52,7 @@ module Suspenders
       invoke :add_administrate
       invoke :add_shrine
       invoke :add_paranoia_to_user
+      invoke :add_address_model
       invoke :configure_rvm_prepend_bin_to_path
       invoke :configure_sidekiq
       invoke :configure_letter_opener

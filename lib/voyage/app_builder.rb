@@ -452,6 +452,9 @@ module Suspenders
     def add_devise_invitable
       bundle_command 'exec rails generate devise_invitable:install'
       bundle_command 'exec rails generate devise_invitable User'
+
+      file = Dir['db/migrate/*_devise_invitable_add_to_users.rb'].first
+      replace_in_file file, 'class DeviseInvitableAddToUsers < ActiveRecord::Migration', 'class DeviseInvitableAddToUsers < ActiveRecord::Migration[4.2]'
     end
 
     def add_custom_routes_for_devise
@@ -745,7 +748,7 @@ resources :images, only: [:create]
 
       copy_file '../templates/concerns_address_fields.rb', 'app/models/concerns/address_fields.rb', force: true
 
-      inject_into_file 'app/models/user.rb', after: 'acts_as_paranoid' do <<-RUBY
+      inject_into_file 'app/models/user.rb', after: 'acts_as_paranoid', force: true do <<-RUBY
 
       include AddressFields
         RUBY
