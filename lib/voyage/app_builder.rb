@@ -804,6 +804,10 @@ RUBY
       copy_file '../templates/views/fields/roles_field/_form.html.erb', 'app/views/fields/roles_field/_form.html.erb', force: true
       copy_file '../templates/views/fields/roles_field/_index.html.erb', 'app/views/fields/roles_field/_index.html.erb', force: true
       copy_file '../templates/views/fields/roles_field/_show.html.erb', 'app/views/fields/roles_field/_show.html.erb', force: true
+      inside('lib') do # arbitrary, run in context of newly generated app
+        run "erb2slim '../app/views/fields' '../app/views/fields'"
+        run "erb2slim -d '../app/views/fields'"
+      end
     end
 
     def customize_application_js
@@ -863,9 +867,14 @@ RUBY
       end
     end
 
-    # TODO: (2017-06-04) jon => make this relevant
     def add_app_css_file
       bundle_command 'exec rails generate foundation:install --skip'
+
+      inject_into_file 'app/assets/stylesheets/foundation_and_overrides.scss', after: '@include foundation-top-bar;' do <<-RUBY.gsub(/^ {8}/, '')
+
+        @include foundation-xy-grid-classes;
+        RUBY
+      end
 
       run 'rm -f app/views/layouts/foundation_layout.html.slim'
 
@@ -894,6 +903,10 @@ RUBY
     def add_navigation_and_footer
       template '../templates/navigation.html.erb', 'app/views/components/_navigation.html.erb', force: true
       template '../templates/footer.html.erb', 'app/views/components/_footer.html.erb', force: true
+      inside('lib') do # arbitrary, run in context of newly generated app
+        run "erb2slim '../app/views/components' '../app/views/components'"
+        run "erb2slim -d '../app/views/components'"
+      end
     end
 
     def generate_test_environment
