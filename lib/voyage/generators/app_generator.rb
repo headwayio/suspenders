@@ -44,6 +44,7 @@ module Suspenders
       invoke :customize_application_mailer
       invoke :add_specs
       invoke :add_cucumber
+      invoke :add_address_model
 
 
       # Do these last
@@ -147,6 +148,10 @@ module Suspenders
 
     def add_cucumber
       build :add_cucumber
+    end
+
+    def add_address_model
+      build :add_address_model
     end
 
     def spin_up_webpacker

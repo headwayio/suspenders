@@ -734,6 +734,24 @@ resources :images, only: [:create]
       end
     end
 
+    def add_address_model
+      bundle_command "exec rails generate model address addressable:references{polymorphic} city:string line1:string line2:string state:string zip:string"
+
+      inject_into_file 'app/models/address.rb', after: 'belongs_to :addressable, polymorphic: true', force: true do <<-RUBY
+
+      validates :line1, :city, :state, :zip, presence: true
+        RUBY
+      end
+
+      copy_file '../templates/concerns_address_fields.rb', 'app/models/concerns/address_fields.rb', force: true
+
+      inject_into_file 'app/models/user.rb', after: 'acts_as_paranoid' do <<-RUBY
+
+      include AddressFields
+        RUBY
+      end
+    end
+
     def add_paranoia_to_user
       generate 'migration add_deleted_at_to_users deleted_at:datetime:index'
 
