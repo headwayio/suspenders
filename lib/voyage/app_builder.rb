@@ -132,6 +132,7 @@ module Suspenders
         authorize_devise_resource_for_index_action
         add_canard_roles_to_devise_resource
         update_devise_initializer(devise_token_auth)
+        add_devise_invitable
         add_custom_routes_for_devise
         customize_user_factory(adding_first_and_last_name)
         generate_seeder_templates(using_devise: true)
@@ -446,6 +447,11 @@ module Suspenders
       replace_in_file 'config/initializers/devise.rb',
         "config.mailer_sender = 'please-change-me-at-config-initializers-devise@example.com'",
         "config.mailer_sender = 'user@example.com'"
+    end
+
+    def add_devise_invitable
+      bundle_command 'exec rails generate devise_invitable:install'
+      bundle_command 'exec rails generate devise_invitable User'
     end
 
     def add_custom_routes_for_devise
