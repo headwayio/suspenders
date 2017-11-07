@@ -1027,6 +1027,9 @@ RUBY
         errors.err
         .ctags
         .cadre/coverage.vim
+        /public/cuke_steps.html
+        /public/uploads
+        #{app_name}-erd.pdf
         RUBY
       end
     end
@@ -1083,7 +1086,8 @@ RUBY
     end
 
     def configure_ci
-      template "../templates/circle.yml.erb", "circle.yml"
+      template "../templates/circle_config.yml.erb", ".circleci/config.yml"
+      template "../templates/codeclimate.yml", ".codeclimate.yml"
     end
 
     def configure_background_jobs_for_rspec
