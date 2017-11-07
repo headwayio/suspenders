@@ -869,6 +869,7 @@ RUBY
 
     def add_app_css_file
       bundle_command 'exec rails generate foundation:install --skip'
+      bundle_command 'exec rails generate kaminari:views foundation'
 
       inject_into_file 'app/assets/stylesheets/foundation_and_overrides.scss', after: '@include foundation-top-bar;' do <<-RUBY.gsub(/^ {8}/, '')
 
