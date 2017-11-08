@@ -56,9 +56,11 @@ module Suspenders
 
       replace_in_file 'app/views/layouts/application.html.erb', find, replace
 
-      inside('lib') do # arbitrary, run in context of newly generated app
-        run "erb2slim '../app/views/layouts' '../app/views/layouts'"
-        run "erb2slim -d '../app/views/layouts'"
+      if @@use_slim
+        inside('lib') do # arbitrary, run in context of newly generated app
+          run "erb2slim '../app/views/layouts' '../app/views/layouts'"
+          run "erb2slim -d '../app/views/layouts'"
+        end
       end
 
       # strip trailing space after closing "> in application layout before
@@ -291,6 +293,13 @@ module Suspenders
     def add_analytics_initializer
       template '../templates/analytics_ruby_initializer.rb', 'config/initializers/analytics_ruby.rb'
       template '../templates/analytics_alias.html.erb.erb', 'app/views/users/analytics_alias.html.erb'
+
+      if @@use_slim
+        inside('lib') do # arbitrary, run in context of newly generated app
+          run "erb2slim '../app/views/users' '../app/views/users'"
+          run "erb2slim -d '../app/views/users'"
+        end
+      end
     end
 
     def customize_resource_controller_for_devise(adding_first_and_last_name)
@@ -667,9 +676,6 @@ module Suspenders
 
       generate 'administrate:views:edit'
 
-      replace_in_file 'app/views/admin/application/_form.html.erb', 'form_for', "simple_form_for"
-      copy_file '../templates/views/admin/application/_navigation.html.erb', 'app/views/admin/application/_navigation.html.erb', force: true
-
       inject_into_file 'config/initializers/simple_form.rb', after: 'SimpleForm.setup do |config|' do <<-RUBY
 
         SimpleForm::FormBuilder.map_type :inet, to: SimpleForm::Inputs::StringInput
@@ -677,12 +683,27 @@ module Suspenders
       RUBY
       end
 
+      copy_administrate_templates
       setup_administrate_sorting
+
+      # TODO: (2017-11-08) noahsettersten => A handful of divs generated in loops don't convert correctly still
+      # if @@use_slim
+        # inside('lib') do # arbitrary, run in context of newly generated app
+          # run "erb2slim '../app/views/admin' '../app/views/admin'"
+          # run "erb2slim -d '../app/views/admin'"
+        # end
+      # end
+    end
+
+    def copy_administrate_templates
+      copy_file '../templates/views/admin/application/_navigation.html.erb', 'app/views/admin/application/_navigation.html.erb', force: true
+      copy_file '../templates/views/admin/application/show.html.erb', 'app/views/admin/application/show.html.erb', force: true
+      copy_file '../templates/views/admin/application/_collection.html.erb', 'app/views/admin/application/_collection.html.erb', force: true
+      copy_file '../templates/views/admin/application/_form.html.erb', 'app/views/admin/application/_form.html.erb', force: true
+      copy_file '../templates/views/admin/application/edit.html.erb', 'app/views/admin/application/edit.html.erb', force: true
     end
 
     def setup_administrate_sorting
-      copy_file '../templates/views/admin/application/show.html.erb', 'app/views/admin/application/show.html.erb', force: true
-      copy_file '../templates/views/admin/application/_collection.html.erb', 'app/views/admin/application/_collection.html.erb', force: true
       copy_file '../templates/concerns_default_sort.rb', 'app/controllers/concerns/default_sort.rb', force: true
       copy_file '../templates/reorder.js', 'app/assets/javascripts/administrate/reorder.js', force: true
 
@@ -802,6 +823,16 @@ resources :images, only: [:create]
 
       copy_file '../templates/views/admin/users/_role_edit.html.erb', 'app/views/admin/users/_role_edit.html.erb', force: true
 
+      # Remove first 16 comment lines of generated _form.html.erb
+      gsub_file 'app/views/admin/users/_form.html.erb',
+        '\A(.*\n){16}',
+        ''
+
+      # Remove first 17 comment lines of generated edit.html.erb
+      gsub_file 'app/views/admin/users/edit.html.erb',
+        '\A(.*\n){17}',
+        ''
+
       # Remove encrypted password field
       gsub_file 'app/dashboards/user_dashboard.rb',
         ':encrypted_password,',
@@ -859,9 +890,11 @@ RUBY
       copy_file '../templates/views/fields/roles_field/_form.html.erb', 'app/views/fields/roles_field/_form.html.erb', force: true
       copy_file '../templates/views/fields/roles_field/_index.html.erb', 'app/views/fields/roles_field/_index.html.erb', force: true
       copy_file '../templates/views/fields/roles_field/_show.html.erb', 'app/views/fields/roles_field/_show.html.erb', force: true
-      inside('lib') do # arbitrary, run in context of newly generated app
-        run "erb2slim '../app/views/fields' '../app/views/fields'"
-        run "erb2slim -d '../app/views/fields'"
+      if @@use_slim
+        inside('lib') do # arbitrary, run in context of newly generated app
+          run "erb2slim '../app/views/fields' '../app/views/fields'"
+          run "erb2slim -d '../app/views/fields'"
+        end
       end
     end
 
@@ -906,7 +939,11 @@ RUBY
 
     def add_high_voltage_static_pages
       template '../templates/about.html.erb', "app/views/pages/about.html.#{@@use_slim ? 'slim' : 'erb'}"
-      template '../templates/welcome.html.erb', "app/views/pages/welcome.html.erb"
+      if @@use_slim
+        template '../templates/welcome.html.slim', 'app/views/pages/welcome.html.slim'
+      else
+        template '../templates/welcome.html.erb', 'app/views/pages/welcome.html.erb'
+      end
       template '../templates/unauthorized.html.erb', "app/views/pages/unauthorized.html.#{@@use_slim ? 'slim' : 'erb'}"
 
       inject_into_file 'config/routes.rb', before: /^end/ do <<-RUBY.gsub(/^ {6}/, '')
@@ -959,9 +996,11 @@ RUBY
     def add_navigation_and_footer
       template '../templates/navigation.html.erb', 'app/views/components/_navigation.html.erb', force: true
       template '../templates/footer.html.erb', 'app/views/components/_footer.html.erb', force: true
-      inside('lib') do # arbitrary, run in context of newly generated app
-        run "erb2slim '../app/views/components' '../app/views/components'"
-        run "erb2slim -d '../app/views/components'"
+      if @@use_slim
+        inside('lib') do # arbitrary, run in context of newly generated app
+          run "erb2slim '../app/views/components' '../app/views/components'"
+          run "erb2slim -d '../app/views/components'"
+        end
       end
     end
 
@@ -1126,6 +1165,14 @@ RUBY
       update_application_layout_for_slim if @@use_slim
 
       template '../templates/analytics_identify.html.erb.erb', 'app/views/application/_analytics_identify.html.erb', force: true
+
+      # TODO: (2017-11-08) noahsettersten => Some multi-line code blocks fail to convert still
+      # if @@use_slim
+        # inside('lib') do # arbitrary, run in context of newly generated app
+          # run "erb2slim '../app/views/application' '../app/views/application'"
+          # run "erb2slim -d '../app/views/application'"
+        # end
+      # end
     end
 
     def create_database
