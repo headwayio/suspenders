@@ -676,6 +676,34 @@ module Suspenders
 
       RUBY
       end
+
+      setup_administrate_sorting
+    end
+
+    def setup_administrate_sorting
+      copy_file '../templates/views/admin/application/show.html.erb', 'app/views/admin/application/show.html.erb', force: true
+      copy_file '../templates/views/admin/application/_collection.html.erb', 'app/views/admin/application/_collection.html.erb', force: true
+      copy_file '../templates/concerns_default_sort.rb', 'app/controllers/concerns/default_sort.rb', force: true
+      copy_file '../templates/reorder.js', 'app/assets/javascripts/administrate/reorder.js', force: true
+
+      inject_into_file 'app/assets/javascripts/administrate/application.js', after: '//= require jquery_ujs' do <<-RUBY.gsub(/^ {6}/, '')
+
+      //= require jquery-ui/widgets/sortable
+      //= require jquery-ui/effects/effect-highlight
+RUBY
+      end
+
+      inject_into_file 'config/routes.rb', after: 'namespace :admin do' do <<-RUBY.gsub(/^ {4}/, '')
+
+        put 'sort' => 'application#sort'
+      RUBY
+      end
+
+      inject_into_file 'app/controllers/admin/application_controller.rb', after: 'class ApplicationController < Administrate::ApplicationController' do <<-RUBY
+
+        include DefaultSort
+      RUBY
+      end
     end
 
     def setup_trix_drag_and_drop
@@ -683,7 +711,7 @@ module Suspenders
       template '../templates/images_controller.rb', 'app/controllers/images_controller.rb', force: true
 
       # Setup Javascript for Trix drag-and-drop uploads
-      generate 'administrate:assets:javascript'
+      generate 'administrate:assets:javascripts'
       copy_file '../templates/trix_attachments.js', 'app/assets/javascripts/administrate/components/trix_attachments.js', force: true
 
       inject_into_file 'app/abilities/users.rb', after: 'Canard::Abilities.for(:user) do' do <<-RUBY.gsub(/^ {6}/, '')

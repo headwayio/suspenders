@@ -16,6 +16,27 @@ Assuming that devise was opted in to, a user and admin have been seeded for you:
     admin@example.com -> asdfjkl123
     user_1@example.com -> asdfjkl123
 
+
+## Sortable collections in Administrate
+
+Voyage supports drag and drop reordering of collections within Administrate. To enable
+this for a resource, configure the following:
+
+1. Add a `:position` column to the model with an `:integer` type.
+2. Update the model's dashboard to include the `position` column as a `Field::Number`.
+3. Within `app/controllers/admin/#{resources}_controller.rb`, add this include to add the `sort` action:
+  `include DefaultSort`
+
+If sorting is to be global across the entirety of the resource:
+2. Add `acts_as_list` to the model file.
+
+If sorting is to be within a containing list or relationship,
+2. Add `acts_as_list scope: :assocation_name` to the model file replacing
+  `:association_name` with the association to scope the ordering to.
+3. On the parent association, update the `has_many` relationship to include
+  a scope as follows: `-> { order(position ::asc) }`. This will ensure that
+  returned children are sorted as intended.
+
 ## Static Pages
 
 The HighVoltage gem is used.
