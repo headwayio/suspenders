@@ -167,3 +167,7 @@ end
 Then(/^the CSV should be downloaded$/) do
   expect(page.response_headers['Content-Type']).to eq('text/csv')
 end
+
+Given(/^I press "([^"]*)" in a row containing "([^"]*)"$/) do |button, name|
+  page.find('tr', text: name).click_button(button)
+end
