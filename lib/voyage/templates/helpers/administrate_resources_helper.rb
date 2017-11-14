@@ -3,7 +3,7 @@ module AdministrateResourcesHelper
   # but may not need to appear in the left menu.
   # NOTE: Add resource names here to hide them in the Administrate sidebar.
   def resources_to_ignore
-    %w[]
+    %w[application]
   end
 
   def resources_for_sidebar_nav

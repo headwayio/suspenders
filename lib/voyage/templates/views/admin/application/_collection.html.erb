@@ -1,4 +1,17 @@
-<table aria-labelledby="<%= table_title %>">
+<% if resources.first.respond_to?(:has_many_through_sort_scope) %>
+  <% sort_model = resources.first.has_many_through_sort_scope %>
+<% else %>
+  <% sort_model = resources.first.class.name %>
+<% end %>
+
+<table
+  class='table table-responsive'
+  aria-labelledby="<%= table_title %>"
+  data-sortable-parent-model-id="<%= params[:id] %>"
+  data-sortable-model="<%= sort_model %>"
+  data-resource-model="<%= resources.first.class.name %>"
+  data-sortable-update-endpoint="/admin/sort"
+  >
   <thead>
     <tr>
       <% collection_presenter.attribute_types.each do |attr_name, attr_type| %>
@@ -12,7 +25,7 @@
           collection_presenter.order_params_for(attr_name)
         )) do %>
         <%= t(
-          "helpers.label.#{collection_presenter.resource_name}.#{attr_name}",
+          "helpers.label.#{resource_name}.#{attr_name}",
           default: attr_name.to_s,
         ).titleize %>
 
@@ -26,14 +39,6 @@
           <% end %>
         </th>
       <% end %>
-
-      <th class="cell-label"
-        scope="col"
-        role="columnheader"
-      >
-        Impersonation
-      </th>
-
       <% [valid_action?(:edit, collection_presenter.resource_name),
           valid_action?(:destroy, collection_presenter.resource_name)].count(true).times do %>
         <th scope="col"></th>
@@ -41,10 +46,11 @@
     </tr>
   </thead>
 
-  <tbody>
+  <tbody id='table_body_id'>
     <% resources.each do |resource| %>
       <tr class="js-table-row"
           tabindex="0"
+          data-table-row-id="<%= resource.id %>"
           <% if valid_action? :show, collection_presenter.resource_name %>
             <%= %(role=link data-url=#{polymorphic_path([namespace, resource])}) %>
           <% end %>
@@ -58,10 +64,6 @@
             </a>
           </td>
         <% end %>
-
-        <td class="cell-data">
-          <a href="<%= impersonate_admin_user_path(resource.id) %>">Impersonate</a>
-        </td>
 
         <% if valid_action? :edit, collection_presenter.resource_name %>
           <td><%= link_to(
