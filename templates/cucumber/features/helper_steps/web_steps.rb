@@ -68,6 +68,10 @@ Then(/^(?:|I )should see "([^"]*)"$/) do |text|
   page.should have_content(text)
 end
 
+Then(/^(?:|I )should see "([^"]*)" in "([^"]*)"$/) do |text, selector|
+  page.find(selector).should have_content(text)
+end
+
 Then(/^(?:|I )should not see "([^"]*)"$/) do |text|
   page.should have_no_content(text)
 end
