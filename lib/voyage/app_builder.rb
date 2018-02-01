@@ -841,7 +841,6 @@ RUBY
       template '../templates/application.js', 'app/assets/javascripts/application.js', force: true
 
       template '../templates/app_name.js', "app/assets/javascripts/#{app_name}.js", force: true
-      inject_into_file 'app/assets/javascripts/application.js', after: '//= require foundation' do <<-RUBY.gsub(/^ {8}/, '')
 
         //= require #{app_name}
       RUBY
@@ -895,15 +894,6 @@ RUBY
     end
 
     def add_app_css_file
-      bundle_command 'exec rails generate foundation:install --skip'
-      bundle_command 'exec rails generate kaminari:views foundation'
-
-      inject_into_file 'app/assets/stylesheets/foundation_and_overrides.scss', after: '@include foundation-top-bar;' do <<-RUBY.gsub(/^ {8}/, '')
-
-        @include foundation-xy-grid-classes;
-        RUBY
-      end
-
       run 'rm -f app/views/layouts/foundation_layout.html.slim'
 
       create_file "app/assets/stylesheets/#{app_name}.scss" do <<-RUBY.gsub(/^ {8}/, '')

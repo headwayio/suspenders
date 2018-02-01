@@ -47,7 +47,6 @@ module Suspenders
 
 
       # Do these last
-      invoke :add_api_foundation
       invoke :rake_db_setup
       invoke :add_administrate
       invoke :add_shrine
@@ -156,10 +155,6 @@ module Suspenders
 
     def spin_up_webpacker
       build :spin_up_webpacker
-    end
-
-    def add_api_foundation
-      build :add_api_foundation
     end
 
     def add_administrate
