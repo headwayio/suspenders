@@ -65,7 +65,6 @@ module Suspenders
       invoke :run_rubocop_auto_correct
       invoke :copy_env_to_example
       invoke :add_to_gitignore
-      invoke :spin_up_webpacker
       invoke :actually_setup_spring
       invoke :bon_voyage
       super
