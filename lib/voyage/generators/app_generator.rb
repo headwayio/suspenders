@@ -1,3 +1,4 @@
+puts 'require app yay'
 module Suspenders
   class AppGenerator < Rails::Generators::AppGenerator
     def self.start
@@ -10,11 +11,6 @@ module Suspenders
     def self.preflight_check
       puts '"bundle install" will be run for the current ruby version and gemset. Press enter to continue...'
       prompt = STDIN.gets.chomp
-
-      system('git init .')
-      system('git add -A')
-      system('git commit --allow-empty -m "initial commit"')
-
       unless prompt.empty?
         puts "Skipping install. Please create a ruby gemset first!"
         exit 1
@@ -222,6 +218,15 @@ module Suspenders
     def generate_default
       run('spring stop')
       generate('suspenders:static')
+      generate("suspenders:testing")
+      generate("suspenders:ci")
+      generate("suspenders:forms")
+      generate("suspenders:db_optimizations")
+      generate("suspenders:factories")
+      generate("suspenders:lint")
+      generate("suspenders:jobs")
+      generate("suspenders:analytics")
+      generate("suspenders:views")
 
       # NOTE: (2017-06-04) jon => do the junk from the stylesheet_base_generator, but without burbon, neat, bitters
       gem 'refills', group: [:development, :test]

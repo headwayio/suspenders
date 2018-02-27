@@ -19,6 +19,12 @@ module Suspenders
       :set_heroku_remotes,
     )
 
+    def git_init
+      run('git init .')
+      run('git add -A')
+      run('git commit --allow-empty -m "initial commit"')
+    end
+
     def readme
       template 'README.md.erb', 'README.md'
     end

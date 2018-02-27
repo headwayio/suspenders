@@ -41,6 +41,7 @@ module Suspenders
     end
 
     def suspenders_customization
+      invoke :ensure_git
       invoke :customize_gemfile
       invoke :setup_development_environment
       invoke :setup_production_environment
@@ -60,6 +61,10 @@ module Suspenders
       invoke :create_local_heroku_setup
       invoke :create_heroku_apps
       invoke :outro
+    end
+
+    def ensure_git
+      build :git_init
     end
 
     def customize_gemfile

@@ -846,12 +846,6 @@ RUBY
         //= require #{app_name}
       RUBY
       end
-
-      inject_into_file 'app/views/application/_javascript.html.erb', after: '<%= render "analytics" %>' do <<-RUBY.gsub(/^ {8}/, '')
-
-        <%= render "analytics_identify" %>
-      RUBY
-      end
     end
 
     def require_files_in_lib
@@ -943,11 +937,11 @@ RUBY
     end
 
     def update_test_environment
-      gsub_file 'spec/support/factory_girl.rb',
+      gsub_file 'spec/support/factory_bot.rb',
         'config.include FactoryGirl::Syntax::Methods',
         'config.include FactoryBot::Syntax::Methods'
 
-      inject_into_file 'spec/support/factory_girl.rb', before: /^end/ do <<-RUBY.gsub(/^ {6}/, '')
+      inject_into_file 'spec/support/factory_bot.rb', before: /^end/ do <<-RUBY.gsub(/^ {6}/, '')
 
         # Spring doesn't reload factory_bot
         config.before(:all) do
