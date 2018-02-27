@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+require 'pry'
 
 rails_installed=`gem query --name-matches '^rails$' --installed`
 
@@ -22,6 +23,7 @@ if rails_installed.chomp == 'true'
 
   templates_root = File.expand_path(File.join("..", "templates"), File.dirname(__FILE__))
   template_additions = File.expand_path(File.join("..", "lib/voyage/templates"), File.dirname(__FILE__))
+  binding.pry
   Suspenders::AppGenerator.source_root templates_root
   Suspenders::AppGenerator.source_paths << Rails::Generators::AppGenerator.source_root << template_additions << templates_root
 

@@ -32,4 +32,5 @@ is used by Headway to get a jump start on a working app.
   s.add_dependency 'rails', Voyage::RAILS_VERSION
 
   s.add_development_dependency 'rspec', '~> 3.2'
+  s.add_development_dependency 'pry'
 end

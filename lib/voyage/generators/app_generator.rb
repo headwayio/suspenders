@@ -15,6 +15,10 @@ module Suspenders
         puts "Skipping install. Please create a ruby gemset first!"
         exit 1
       end
+
+      system('git init .')
+      system('git add -A')
+      system('git commit -m "initial commit"')
     end
 
     def self.accept_defaults
@@ -22,6 +26,7 @@ module Suspenders
     end
 
     def finish_template
+      puts "Finishing Voyage Template"
       invoke :suspenders_customization
       invoke :update_gemset_in_gemfile
       invoke :bundle_without_production
