@@ -11,14 +11,14 @@ module Suspenders
       puts '"bundle install" will be run for the current ruby version and gemset. Press enter to continue...'
       prompt = STDIN.gets.chomp
 
+      system('git init .')
+      system('git add -A')
+      system('git commit --allow-empty -m "initial commit"')
+
       unless prompt.empty?
         puts "Skipping install. Please create a ruby gemset first!"
         exit 1
       end
-
-      system('git init .')
-      system('git add -A')
-      system('git commit --allow-empty -m "initial commit"')
     end
 
     def self.accept_defaults
