@@ -18,7 +18,7 @@ module Suspenders
 
       system('git init .')
       system('git add -A')
-      system('git commit -m "initial commit"')
+      system('git commit --allow-empty -m "initial commit"')
     end
 
     def self.accept_defaults
