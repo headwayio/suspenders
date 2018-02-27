@@ -842,12 +842,7 @@ RUBY
 
       template '../templates/app_name.js', "app/assets/javascripts/#{app_name}.js", force: true
 
-        //= require #{app_name}
-      RUBY
-      end
-
       inject_into_file 'app/views/application/_javascript.html.erb', after: '<%= render "analytics" %>' do <<-RUBY.gsub(/^ {8}/, '')
-
         <%= render "analytics_identify" %>
       RUBY
       end
