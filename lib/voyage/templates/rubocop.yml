@@ -22,6 +22,9 @@ Metrics/BlockLength:
 RSpec/NestedGroups:
   Max: 6
 
+RSpec/MessageSpies:
+  EnforcedStyle: receive
+
 RSpec/MultipleExpectations:
   Max: 2
 
@@ -62,6 +65,12 @@ Style/Documentation:
   Description: 'Document classes and non-namespace modules.'
   Enabled: false
 
+Style/BareStringLiterals:
+  Enabled: false
+
+Style/ClassAndModuleChildren:
+  Enabled: false
+
 Style/DotPosition:
   Description: 'Checks the position of the dot in multi-line method calls.'
   StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#consistent-multi-line-chains'
@@ -72,7 +81,16 @@ Style/MultilineMethodCallIndentation:
   EnforcedStyle: indented
   IndentationWidth: 2
 
-Style/TrailingCommaInLiteral:
+Layout/MultilineArrayBraceLayout:
+  EnforcedStyle: new_line
+
+Layout/MultilineHashBraceLayout:
+  EnforcedStyle: new_line
+
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInHashLiteral:
   EnforcedStyleForMultiline: comma
 
 Style/TrailingCommaInArguments:

@@ -1,6 +1,11 @@
 # rubocop:disable Metrics/LineLength
 source "https://rubygems.org"
 
+git_source(:github) do |repo_name|
+  repo_name = "#{repo_name}/#{repo_name}" unless repo_name.include?("/")
+  "https://github.com/#{repo_name}.git"
+end
+
 ruby "<%= Voyage::RUBY_VERSION %>"
 #ruby-gemset
 
@@ -17,10 +22,9 @@ gem "recipient_interceptor"
 gem "redis-namespace"
 gem "sass-rails", "~> 5.0"
 gem "sidekiq"
-gem "simple_form"
-gem "skylight"
+gem 'simple_form'
 gem "sprockets", ">= 3.0.0"
-gem 'voyage'
+gem 'voyage', path: '~/Sites/voyage'
 gem "title"
 gem "uglifier"
 
@@ -48,10 +52,10 @@ gem 'pretender' # impersonate users as an admin
 
 # API / JSON
 gem 'jsonapi-utils'
-gem 'tiddle'
+gem 'tiddle', git: 'https://github.com/adamniedzielski/tiddle.git'
 
 # Administrative panel
-gem 'administrate', github: 'headwayio/administrate', branch: 'release/headway-maintained-master' # , path: '/rails/headway/administrate_gems/administrate'
+gem 'administrate'
 gem 'administrate-field-boolean_to_yes_no'
 gem 'administrate-field-shrine', github: 'headwayio/administrate-field-shrine', branch: 'headway_master'
 gem 'administrate-field-collection_select'
@@ -90,7 +94,6 @@ gem 'pry-remote' # Production debugging
 group :development do
   gem "listen"
   gem "spring"
-  gem "spring-commands-rspec"
   gem "web-console"
 
   # Customizations
@@ -103,16 +106,14 @@ end
 
 group :development, :test do
   gem "awesome_print"
-  gem "bullet"
   gem "bundler-audit", ">= 0.5.0", require: false
   gem "dotenv-rails"
   <%# gem "factory_bot_rails" %>
   <%# gem "pry-byebug" %>
   <%# gem "pry-rails" %>
-  gem "rspec-rails", "~> 3.6"
+
 
   gem 'cucumber-rails', require: false
-  gem 'spring-commands-cucumber'
 
   # Customizations
   gem 'airborne'
@@ -134,7 +135,6 @@ group :test do
   gem "launchy"
   gem "pickle"
   gem "pickler", git: "https://github.com/headwayio/pickler", branch: "feature/support_comments_after_linebreak" # , path: '/rails/headway/pickler'"
-  gem "shoulda-matchers"
   gem "show_me_the_cookies"
   gem "site_prism"
   gem "simplecov", require: false
@@ -144,14 +144,14 @@ group :test do
   # Customizations
   gem 'cadre' # highlights code coverage in vim
   gem 'capybara' # DSL for finding elements on a page during integration testing
+  gem 'capybara-selenium'
+  gem 'chromedriver-helper'
   gem 'json-schema' # Allows testing API responses against JSON schema
-  gem 'poltergeist' # Headless browser, used in integration tests
   gem 'rspec_junit_formatter' # Creates JUnit style XML for use in CircleCI
   gem 'selenium-webdriver' # `brew install chromedriver`, used for acceptance tests in an actual browser.
 end
 
 group :development, :test, :staging do
-  gem 'factory_bot_rails'
   gem 'faker' # provides auto generated names for factories, can be customized
 end
 

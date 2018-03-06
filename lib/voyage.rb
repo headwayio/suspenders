@@ -12,7 +12,10 @@ require "suspenders/generators/lint_generator"
 require "suspenders/generators/jobs_generator"
 require "suspenders/generators/analytics_generator"
 require "suspenders/generators/views_generator"
-require "suspenders/generators/js_driver_generator"
+
+# We don't want this
+# require "suspenders/generators/js_driver_generator
+
 require "suspenders/generators/testing_generator"
 require 'suspenders/actions'
 require "suspenders/adapters/heroku"
@@ -20,4 +23,5 @@ require 'suspenders/app_builder'
 
 require 'voyage/generators/app_generator'
 require 'voyage/generators/factories_generator'
+require 'voyage/generators/forms_generator'
 require 'voyage/app_builder'

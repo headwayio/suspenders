@@ -1,4 +1,3 @@
-puts 'require app yay'
 module Suspenders
   class AppGenerator < Rails::Generators::AppGenerator
     def self.start
@@ -49,10 +48,10 @@ module Suspenders
 
       # Do these last
       invoke :add_api_foundation
+      invoke :add_paranoia_to_user
       invoke :rake_db_setup
       invoke :add_administrate
       invoke :add_shrine
-      invoke :add_paranoia_to_user
       invoke :add_address_model
       invoke :configure_rvm_prepend_bin_to_path
       invoke :configure_sidekiq
@@ -154,10 +153,6 @@ module Suspenders
       build :add_address_model
     end
 
-    def spin_up_webpacker
-      build :spin_up_webpacker
-    end
-
     def add_api_foundation
       build :add_api_foundation
     end
@@ -230,7 +225,7 @@ module Suspenders
 
       # NOTE: (2017-06-04) jon => do the junk from the stylesheet_base_generator, but without burbon, neat, bitters
       gem 'refills', group: [:development, :test]
-      Bundler.with_clean_env { run 'bundle install' }
+      Bundler.with_clean_env { run 'bundle install --quiet' }
 
       copy_file(
         'application.scss',

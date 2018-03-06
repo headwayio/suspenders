@@ -1,4 +1,3 @@
-puts 'require factories yay'
 require "rails/generators"
 
 module Suspenders

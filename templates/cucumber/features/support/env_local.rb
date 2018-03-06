@@ -2,7 +2,7 @@ require 'simplecov'
 SimpleCov.coverage_dir 'coverage/cucumber'
 SimpleCov.start 'rails'
 
-require 'capybara/poltergeist'
+require 'selenium/webdriver'
 require 'capybara/dsl'
 
 require 'site_prism'
@@ -11,16 +11,26 @@ SitePrism.use_implicit_waits = true
 require 'email_spec'
 require 'email_spec/cucumber'
 
-Capybara.default_driver = :rack_test
-Capybara.javascript_driver = :poltergeist
-Capybara.asset_host = 'http://localhost:3000'
-
-Capybara.register_driver :poltergeist_debug do |app|
-  Capybara::Poltergeist::Driver.new(app, inspector: true)
+Capybara.register_driver :chrome do |app|
+  Capybara::Selenium::Driver.new(app, browser: :chrome)
 end
 
+Capybara.register_driver :headless_chrome do |app|
+  capabilities = Selenium::WebDriver::Remote::Capabilities.chrome(
+    chromeOptions: { args: %w(headless disable-gpu) }
+  )
+
+  Capybara::Selenium::Driver.new app,
+    browser: :chrome,
+    desired_capabilities: capabilities
+end
+
+Capybara.javascript_driver = :headless_chrome
+Capybara.default_driver = :rack_test
+Capybara.asset_host = 'http://localhost:3000'
+
 Before('@javascript_debug') do
-  Capybara.current_driver = :poltergeist_debug
+  Capybara.current_driver = :headless_chrome
 end
 After('@javascript_debug') do
   Capybara.use_default_driver
