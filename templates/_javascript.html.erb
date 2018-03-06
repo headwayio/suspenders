@@ -1,5 +1,7 @@
 <%= javascript_include_tag :application %>
 
+<%= render 'application/rollbar_js' %>
+
 <%= yield :javascript %>
 
 <% if Rails.env.test? %>

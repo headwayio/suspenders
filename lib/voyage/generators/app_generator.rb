@@ -48,10 +48,10 @@ module Suspenders
 
       # Do these last
       invoke :add_api_foundation
+      invoke :add_paranoia_to_user
       invoke :rake_db_setup
       invoke :add_administrate
       invoke :add_shrine
-      invoke :add_paranoia_to_user
       invoke :add_address_model
       invoke :configure_rvm_prepend_bin_to_path
       invoke :configure_sidekiq
@@ -60,7 +60,6 @@ module Suspenders
       invoke :run_rubocop_auto_correct
       invoke :copy_env_to_example
       invoke :add_to_gitignore
-      invoke :spin_up_webpacker
       invoke :actually_setup_spring
       invoke :bon_voyage
       super
@@ -154,10 +153,6 @@ module Suspenders
       build :add_address_model
     end
 
-    def spin_up_webpacker
-      build :spin_up_webpacker
-    end
-
     def add_api_foundation
       build :add_api_foundation
     end
@@ -218,10 +213,18 @@ module Suspenders
     def generate_default
       run('spring stop')
       generate('suspenders:static')
-
+      generate("suspenders:testing")
+      generate("suspenders:ci")
+      generate("suspenders:forms")
+      generate("suspenders:db_optimizations")
+      generate("suspenders:factories")
+      generate("suspenders:lint")
+      generate("suspenders:jobs")
+      generate("suspenders:analytics")
+      generate("suspenders:views")
       # NOTE: (2017-06-04) jon => do the junk from the stylesheet_base_generator, but without burbon, neat, bitters
       gem 'refills', group: [:development, :test]
-      Bundler.with_clean_env { run 'bundle install' }
+      Bundler.with_clean_env { run 'bundle install --quiet' }
 
       copy_file(
         'application.scss',

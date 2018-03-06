@@ -663,7 +663,7 @@ module Suspenders
 
       copy_file '../templates/views/admin/users/_collection.html.erb', 'app/views/admin/users/_collection.html.erb', force: true
       copy_file '../templates/views/admin/users/index.html.erb', 'app/views/admin/users/index.html.erb', force: true
-      copy_file '../templates/views/admin/users/_password_fields.html.slim', 'app/views/admin/users/index.html.slim', force: true
+      copy_file '../templates/views/admin/users/_password_fields.html.slim', 'app/views/admin/users/_password_fields.html.slim', force: true
 
       generate 'administrate:views:edit'
 
@@ -683,7 +683,7 @@ module Suspenders
       template '../templates/images_controller.rb', 'app/controllers/images_controller.rb', force: true
 
       # Setup Javascript for Trix drag-and-drop uploads
-      generate 'administrate:assets:javascript'
+      generate 'administrate:assets:javascripts'
       copy_file '../templates/trix_attachments.js', 'app/assets/javascripts/administrate/components/trix_attachments.js', force: true
 
       inject_into_file 'app/abilities/users.rb', after: 'Canard::Abilities.for(:user) do' do <<-RUBY.gsub(/^ {6}/, '')
@@ -943,11 +943,11 @@ RUBY
     end
 
     def update_test_environment
-      gsub_file 'spec/support/factory_girl.rb',
+      gsub_file 'spec/support/factory_bot.rb',
         'config.include FactoryGirl::Syntax::Methods',
         'config.include FactoryBot::Syntax::Methods'
 
-      inject_into_file 'spec/support/factory_girl.rb', before: /^end/ do <<-RUBY.gsub(/^ {6}/, '')
+      inject_into_file 'spec/support/factory_bot.rb', before: /^end/ do <<-RUBY.gsub(/^ {6}/, '')
 
         # Spring doesn't reload factory_bot
         config.before(:all) do
@@ -1061,11 +1061,6 @@ RUBY
       end
     end
 
-    def spin_up_webpacker
-      rake 'webpacker:install'
-      rake 'webpacker:install:react'
-    end
-
     ###############################
     # OVERRIDE SUSPENDERS METHODS #
     ###############################
@@ -1108,26 +1103,7 @@ RUBY
     # --------------------------------
     # setup_test_environment overrides
     # --------------------------------
-    def generate_factories_file
-      # NOTE: (2016-02-03) jonk => don't want this, we use individual factories
-    end
 
-    def configure_ci
-      template "../templates/circle_config.yml.erb", ".circleci/config.yml"
-      template "../templates/codeclimate.yml", ".codeclimate.yml"
-    end
-
-    def configure_background_jobs_for_rspec
-      # NOTE: (2017-05-31) jon => don't want this
-    end
-
-    def configure_active_job
-      # NOTE: (2017-06-02) jon => don't want this
-    end
-
-    def configure_capybara_webkit
-      # NOTE: (2016-02-03) jonk => don't want this
-    end
     # ------------------------------------
     # End setup_test_environment overrides
     # ------------------------------------
